@@ -53,30 +53,3 @@
     transform: scale(0.94);
   }
 }
-
-
-.iconWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.countBadge {
-  position: absolute;
-  top: -4px;
-  inset-inline-end: -8px;
-  background: var(--main_color);
-  color: #ffffff;
-  font-size: 9.5px;
-  font-weight: 800;
-  min-width: 15px;
-  height: 15px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}

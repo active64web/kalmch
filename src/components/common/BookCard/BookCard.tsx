@@ -2,7 +2,6 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Heart, Star, BookOpen, Trash2 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
@@ -11,7 +10,6 @@ import styles from "./BookCard.module.scss";
 export interface BookCardProps {
   book: BookItem;
   variant?: "default" | "library";
-  showReadAction?: boolean;
   showRemoveButton?: boolean;
   onRemove?: (bookId: string) => void;
   onToggleFavorite?: (bookId: string, isFav: boolean) => void;
@@ -20,12 +18,10 @@ export interface BookCardProps {
 export const BookCard: React.FC<BookCardProps> = ({
   book,
   variant = "default",
-  showReadAction = false,
   showRemoveButton = false,
   onRemove,
   onToggleFavorite,
 }) => {
-  const router = useRouter();
   const { isBookSaved, toggleSaveBook, removeBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
 
@@ -43,27 +39,20 @@ export const BookCard: React.FC<BookCardProps> = ({
     onRemove?.(book.id);
   };
 
-  const handleReadClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/reader/${book.id}`);
-  };
-
-  const isLibraryVariant = variant === "library" || showReadAction || showRemoveButton;
+  const isLibraryVariant = variant === "library" || showRemoveButton;
 
   return (
-    <Link
-      href={`/books/${encodeURIComponent(book.slug)}`}
-      className={`${styles.cardContainer} ${isLibraryVariant ? styles.libraryCard : ""}`}
+    <div
+      className={styles.cardContainer}
       aria-label={`كتاب ${book.title} للمؤلف ${book.author}`}
     >
-      {/* 1. Compact Cover Box with Unified Placeholder & Heart Button */}
+      {/* 1. Compact Cover Box with Independent Favorite Button */}
       <div className={styles.coverBox}>
         <div className={styles.placeholderIconBox} aria-hidden="true">
           <BookOpen size={20} />
         </div>
 
-        {/* Favorite Heart Button (Adds to My Library) */}
+        {/* Favorite Heart Button */}
         <button
           type="button"
           onClick={handleToggleFavorite}
@@ -105,19 +94,18 @@ export const BookCard: React.FC<BookCardProps> = ({
         </div>
       </div>
 
-      {/* 4. Optional Library Mode Actions (Read Now + Remove) */}
-      {isLibraryVariant && (
-        <div className={styles.libraryActions}>
-          <button
-            type="button"
-            onClick={handleReadClick}
-            className={styles.readNowBtn}
-            title="ابدأ قراءة الكتاب الآن"
-          >
-            <BookOpen size={13} />
-            <span>اقرأ الآن</span>
-          </button>
+      {/* 4. Action Row: Entry/Read Button (always visible) + optional Remove in library */}
+      <div className={styles.cardActions}>
+        <Link
+          href={`/reader/${book.id}`}
+          className={styles.readNowBtn}
+          title="ابدأ قراءة الكتاب الآن"
+        >
+          <BookOpen size={13} />
+          <span>اقرأ الآن</span>
+        </Link>
 
+        {isLibraryVariant && (
           <button
             type="button"
             onClick={handleRemove}
@@ -127,8 +115,8 @@ export const BookCard: React.FC<BookCardProps> = ({
           >
             <Trash2 size={13} />
           </button>
-        </div>
-      )}
-    </Link>
+        )}
+      </div>
+    </div>
   );
 };

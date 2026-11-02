@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Bookmark, Grid3X3, Users, MessageSquare } from "lucide-react";
-import { useLibrary } from "@/context/LibraryContext";
 import styles from "./BottomNav.module.scss";
 
 const bottomItems = [
@@ -17,7 +16,6 @@ const bottomItems = [
 
 export const BottomNav: React.FC = () => {
   const pathname = usePathname();
-  const { totalSavedCount, isLoaded } = useLibrary();
 
   return (
     <nav className={styles.bottomNavWrapper} aria-label="شريط التنقل السفلي للموبايل">
@@ -34,12 +32,7 @@ export const BottomNav: React.FC = () => {
             href={item.href}
             className={`${styles.navItem} ${isActive ? styles.active : ""}`}
           >
-            <div className={styles.iconWrapper}>
-              <Icon size={20} className={styles.icon} />
-              {item.href === "/my-library" && isLoaded && totalSavedCount > 0 && (
-                <span className={styles.countBadge}>{totalSavedCount}</span>
-              )}
-            </div>
+            <Icon size={20} className={styles.icon} />
             <span>{item.label}</span>
           </Link>
         );

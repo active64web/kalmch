@@ -34,7 +34,7 @@ export default function MyLibraryPage() {
         title="هل تبحث عن كتاب روحي معين أو موضوع دراسي محدد؟"
         description="تضم منصة قَلَم مئات الكتب والمخطوطات والدراسات المسيحية المصنفة بعناية لتغذية فكرك وروحك."
         primaryAction={{
-          label: "تصفح كافة الأقسام",
+          label: "تصفح الأقسام",
           href: "/categories",
         }}
         secondaryAction={{

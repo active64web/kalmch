@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,13 +23,17 @@ export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
-  // Detect scroll to toggle transparent vs solid background
+  // Throttled scroll listener using requestAnimationFrame to eliminate scroll jank
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 15) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrolled = window.scrollY > 15;
+          setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
@@ -38,27 +42,41 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile search on route change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsMobileSearchOpen(false);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [pathname]);
+  // Close mobile search on route change without triggering cascading effect renders
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setIsMobileSearchOpen(false);
+  }
 
-  // Focus mobile input when opened
+  // Smooth mobile focus/blur without causing layout thrashing or keyboard animation stutter
   useEffect(() => {
     if (isMobileSearchOpen) {
-      mobileInputRef.current?.focus();
+      // Delay focus slightly (200ms) so drawer animation slides down at 60fps first
+      // before virtual keyboard pops up and causes viewport resize
+      const timer = setTimeout(() => {
+        mobileInputRef.current?.focus();
+      }, 200);
+      return () => clearTimeout(timer);
+    } else {
+      mobileInputRef.current?.blur();
     }
   }, [isMobileSearchOpen]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      router.push(`/categories?search=${encodeURIComponent(searchTerm.trim())}`);
-      setIsMobileSearchOpen(false);
-    }
+  const handleSearch = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (searchTerm.trim()) {
+        router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
+        setIsMobileSearchOpen(false);
+        mobileInputRef.current?.blur();
+      }
+    },
+    [searchTerm, router]
+  );
+
+  const toggleMobileSearch = () => {
+    setIsMobileSearchOpen((prev) => !prev);
   };
 
   return (
@@ -128,8 +146,8 @@ export const Header: React.FC = () => {
           <button
             type="button"
             className={styles.mobileSearchBtn}
-            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
-            aria-label="فتح شريط البحث"
+            onClick={toggleMobileSearch}
+            aria-label={isMobileSearchOpen ? "إغلاق شريط البحث" : "فتح شريط البحث"}
           >
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
           </button>
@@ -147,34 +165,38 @@ export const Header: React.FC = () => {
           isMobileSearchOpen ? styles.open : ""
         }`}
       >
-        <form onSubmit={handleSearch} className={styles.mobileSearchForm}>
-          <input
-            ref={mobileInputRef}
-            type="search"
-            placeholder="ابحث عن كتاب، مؤلف..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.mobileSearchInputField}
-            aria-label="البحث في الموبايل"
-          />
-          <button
-            type="submit"
-            className={styles.mobileSearchSubmitBtn}
-            aria-label="تنفيذ البحث"
-          >
-            <Search size={18} />
-          </button>
-          {searchTerm && (
+        <div className={styles.mobileSearchInner}>
+          <form onSubmit={handleSearch} className={styles.mobileSearchForm}>
+            <input
+              ref={mobileInputRef}
+              type="search"
+              placeholder="ابحث عن كتاب، مؤلف..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.mobileSearchInputField}
+              aria-label="البحث في الموبايل"
+              autoComplete="off"
+              enterKeyHint="search"
+            />
             <button
-              type="button"
-              className={styles.mobileSearchClose}
-              onClick={() => setSearchTerm("")}
-              aria-label="مسح النص"
+              type="submit"
+              className={styles.mobileSearchSubmitBtn}
+              aria-label="تنفيذ البحث"
             >
-              <X size={14} />
+              <Search size={18} />
             </button>
-          )}
-        </form>
+            {searchTerm && (
+              <button
+                type="button"
+                className={styles.mobileSearchClose}
+                onClick={() => setSearchTerm("")}
+                aria-label="مسح النص"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </form>
+        </div>
       </div>
     </header>
   );

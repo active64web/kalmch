@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import {
   HeroSection,
   CategoriesSection,
@@ -5,6 +6,23 @@ import {
   AuthorsSection,
 } from "@/features/home";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
+import { constructMetadata } from "@/utils/seo";
+
+export const metadata: Metadata = constructMetadata({
+  title: "قَلَم | منصة الكتب والمؤلفات المسيحية",
+  description:
+    "استكشف واقرأ آلاف الكتب والدراسات الروحية واللاهوتية وتاريخ الكنيسة لنخبة من كبار الآباء والمؤلفين عبر منصة قَلَم.",
+  path: "/",
+  keywords: [
+    "منصة قلم",
+    "كتب مسيحية",
+    "قراءة كتب اونلاين",
+    "المكتبة القبطية الأرثوذكسية",
+    "كتب البابا شنوده",
+    "كتب متى المسكين",
+    "تفاسير الكتاب المقدس",
+  ],
+});
 
 export default function Home() {
   return (

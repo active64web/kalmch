@@ -33,8 +33,12 @@ body {
 
 a,
 button,
-[role="button"] {
+[role="button"],
+input,
+select,
+textarea {
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 body,
@@ -94,6 +98,15 @@ a {
         gap: 50px;
         padding-top: 0;
         padding-bottom: 74px;
+    }
+
+    /* Fixed Header Compensation: Any page not starting with PageHeader or Hero automatically offsets for floating header */
+    > :first-child:not(.page-header):not([class*="hero"]) {
+        margin-top: calc(80px + 32px);
+
+        @media (max-width: 768px) {
+            margin-top: calc(64px + 20px);
+        }
     }
 
     >section:not(.page-header) {

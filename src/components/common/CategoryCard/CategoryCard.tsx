@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import type { CategoryItem } from "@/data/categories.data";
@@ -8,10 +8,10 @@ interface CategoryCardProps {
   category: CategoryItem;
 }
 
-export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
+const CategoryCardComponent: React.FC<CategoryCardProps> = ({ category }) => {
   return (
     <Link
-      href={`/categories?cat=${encodeURIComponent(category.slug)}`}
+      href={`/categories/${encodeURIComponent(category.slug)}`}
       className={styles.cardWrapper}
     >
       <div className={styles.iconBox} aria-hidden="true">
@@ -23,3 +23,5 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
     </Link>
   );
 };
+
+export const CategoryCard = memo(CategoryCardComponent);

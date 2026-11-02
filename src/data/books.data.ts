@@ -13,6 +13,7 @@ export interface BookItem {
   badge?: "جديد" | "حصري" | "الأكثر قراءة" | "مميز";
   section: "latest" | "recommended" | "popular" | "history" | "exclusive";
   pdfUrl?: string;
+  description?: string;
 }
 
 export const booksData: BookItem[] = [

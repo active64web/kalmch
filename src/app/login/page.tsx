@@ -2,12 +2,15 @@ import React from "react";
 import { Metadata } from "next";
 import { PageHeader } from "@/components/common/PageHeader";
 import { AuthContainer } from "@/features/auth";
+import { constructMetadata } from "@/utils/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "تسجيل الدخول | قَلَم - المكتبة المسيحية",
   description:
     "سجل دخولك إلى حسابك في منصة قَلَم للوصول إلى كتبك المحفوظة ومتابعة قراءاتك المسيحية.",
-};
+  path: "/login",
+  noIndex: true,
+});
 
 export default function LoginPage() {
   return (
@@ -26,4 +29,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

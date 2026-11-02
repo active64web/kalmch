@@ -3,12 +3,21 @@ import { Metadata } from "next";
 import { PageHeader } from "@/components/common/PageHeader";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { ContactContainer } from "@/features/contact";
+import { constructMetadata } from "@/utils/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "تواصل معنا | قَلَم - المكتبة المسيحية",
   description:
-    "يسعدنا تواصلكم واستقبال استفساراتكم واقتراحاتكم بشأن الكتب والمؤلفات المسيحية على منصة قَلَم.",
-};
+    "يسعدنا تواصلكم واستقبال استفساراتكم وملاحظاتكم واقتراح كتب أو دراسات مسيحية جديدة على منصة قَلَم.",
+  path: "/contact",
+  keywords: [
+    "تواصل مع قلم",
+    "اقتراح كتاب مسيحي",
+    "نشر كتاب مسيحي",
+    "منصة قلم",
+    "المكتبة المسيحية",
+  ],
+});
 
 export default function ContactPage() {
   return (
@@ -29,19 +38,18 @@ export default function ContactPage() {
 
       {/* 3. Global Bottom CTA */}
       <GlobalCTA
-        badge="انضم إلينا ككاتب"
-        title="هل لديك مؤلفات أو دراسات روحية مسيحية؟"
-        description="انضم إلى نخبة الكُتاب والمفكرين في منصة قَلَم، وشارك كتاباتك لتصل إلى آلاف الباحثين عن الكلمة الصادقة بكل يسر وهدوء."
+        badge="انضم إلينا"
+        title="هل ترغب في المساهمة في رقمنة ونشر التراث الكنسي؟"
+        description="تفتح منصة قَلَم أبوابها لكل الخدام والباحثين للمشاركة في تدقيق وفهرسة الكتب لتصل إلى أكبر قطاع من محبي القراءة."
         primaryAction={{
-          label: "سجّل حسابك",
-          href: "/register",
+          label: "استكشف الأقسام",
+          href: "/categories",
         }}
         secondaryAction={{
-          label: "تصفح دليل المؤلفين",
-          href: "/authors",
+          label: "مكتبتي",
+          href: "/my-library",
         }}
       />
     </div>
   );
 }
-

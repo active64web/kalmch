@@ -2,12 +2,15 @@ import React from "react";
 import { Metadata } from "next";
 import { PageHeader } from "@/components/common/PageHeader";
 import { AuthContainer } from "@/features/auth";
+import { constructMetadata } from "@/utils/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = constructMetadata({
   title: "إنشاء حساب جديد | قَلَم - المكتبة المسيحية",
   description:
-    "أنشئ حسابك المجاني في منصة قَلَم وانضم إلى مجتمع القراء والمفكرين.",
-};
+    "أنشئ حسابك المجاني في منصة قَلَم وانضم إلى مجتمع القراء والمفكرين في التراث الفكري والروحي المسيحي.",
+  path: "/register",
+  noIndex: true,
+});
 
 export default function RegisterPage() {
   return (
@@ -26,4 +29,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

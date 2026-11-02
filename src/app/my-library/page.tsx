@@ -4,11 +4,15 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { LibraryContainer } from "@/features/library";
 
-export const metadata: Metadata = {
-  title: "مكتبتي | قَلَم - المكتبة المسيحية",
+import { constructMetadata } from "@/utils/seo";
+
+export const metadata: Metadata = constructMetadata({
+  title: "مكتبتي الخاصة | قَلَم - كتبك المحفوظة",
   description:
     "مجموعتك الخاصة والمختارة من الكتب والمؤلفات المسيحية المحفوظة للمطالعة والمتابعة في أي وقت على منصة قَلَم.",
-};
+  path: "/my-library",
+  noIndex: true,
+});
 
 export default function MyLibraryPage() {
   return (

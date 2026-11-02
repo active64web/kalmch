@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import { Heart, Star, BookOpen, Trash2 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
@@ -15,7 +15,7 @@ export interface BookCardProps {
   onToggleFavorite?: (bookId: string, isFav: boolean) => void;
 }
 
-export const BookCard: React.FC<BookCardProps> = ({
+const BookCardComponent: React.FC<BookCardProps> = ({
   book,
   variant = "default",
   showRemoveButton = false,
@@ -40,6 +40,9 @@ export const BookCard: React.FC<BookCardProps> = ({
   };
 
   const isLibraryVariant = variant === "library" || showRemoveButton;
+  const bookDetailsPath = `/categories/${encodeURIComponent(
+    book.categorySlug
+  )}/${encodeURIComponent(book.slug)}`;
 
   return (
     <div
@@ -52,7 +55,7 @@ export const BookCard: React.FC<BookCardProps> = ({
           <BookOpen size={20} />
         </div>
 
-        {/* Favorite Heart Button */}
+        {/* Floating Heart / Favorite Button */}
         <button
           type="button"
           onClick={handleToggleFavorite}
@@ -73,12 +76,13 @@ export const BookCard: React.FC<BookCardProps> = ({
         <h4 className={styles.bookTitle} title={book.title}>
           {book.title}
         </h4>
+
         <p className={styles.authorName} title={book.author}>
           {book.author}
         </p>
 
         {/* 3. Star Rating */}
-        <div className={styles.ratingRow} aria-label={`تقييم ${book.rating} من 5`}>
+        <div className={styles.ratingRow} aria-label={`تقييم 5 نجوم`}>
           <div className={styles.starGroup}>
             {[...Array(5)].map((_, idx) => (
               <Star
@@ -90,19 +94,19 @@ export const BookCard: React.FC<BookCardProps> = ({
               />
             ))}
           </div>
-          <span className={styles.ratingValue}>{book.rating}.0</span>
+          <span className={styles.ratingValue}>{book.rating || 5}.0</span>
         </div>
       </div>
 
-      {/* 4. Action Row: Entry/Read Button (always visible) + optional Remove in library */}
+      {/* 4. Action Row: Details Button (always visible) + optional Remove in library */}
       <div className={styles.cardActions}>
         <Link
-          href={`/reader/${book.id}`}
+          href={bookDetailsPath}
           className={styles.readNowBtn}
-          title="ابدأ قراءة الكتاب الآن"
+          title="عرض تفاصيل الكتاب"
         >
           <BookOpen size={13} />
-          <span>اقرأ الآن</span>
+          <span>التفاصيل</span>
         </Link>
 
         {isLibraryVariant && (
@@ -120,3 +124,5 @@ export const BookCard: React.FC<BookCardProps> = ({
     </div>
   );
 };
+
+export const BookCard = memo(BookCardComponent);

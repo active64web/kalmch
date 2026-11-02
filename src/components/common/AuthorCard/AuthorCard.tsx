@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { User } from "lucide-react";
@@ -9,10 +9,10 @@ interface AuthorCardProps {
   author: AuthorItem;
 }
 
-export const AuthorCard: React.FC<AuthorCardProps> = ({ author }) => {
+const AuthorCardComponent: React.FC<AuthorCardProps> = ({ author }) => {
   return (
     <Link
-      href={`/authors?author=${encodeURIComponent(author.slug)}`}
+      href={`/authors/${encodeURIComponent(author.slug || author.id)}`}
       className={styles.cardWrapper}
       aria-label={`المؤلف ${author.name}`}
     >
@@ -43,3 +43,4 @@ export const AuthorCard: React.FC<AuthorCardProps> = ({ author }) => {
   );
 };
 
+export const AuthorCard = memo(AuthorCardComponent);

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, LogIn, X } from "lucide-react";
+import { useLibrary } from "@/context/LibraryContext";
 import styles from "./Header.module.scss";
 
 const navLinks = [
@@ -18,6 +19,7 @@ const navLinks = [
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { totalSavedCount, isLoaded } = useLibrary();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -102,7 +104,10 @@ export const Header: React.FC = () => {
                 href={link.href}
                 className={`${styles.navLink} ${isActive ? styles.active : ""}`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.href === "/my-library" && isLoaded && totalSavedCount > 0 && (
+                  <span className={styles.navCountBadge}>{totalSavedCount}</span>
+                )}
               </Link>
             );
           })}
@@ -118,28 +123,22 @@ export const Header: React.FC = () => {
             className={styles.searchInput}
             aria-label="البحث في الكتب"
           />
-          <button
-            type="submit"
-            className={styles.searchSubmitBtn}
-            aria-label="تنفيذ البحث"
-          >
+          <button type="submit" className={styles.searchBtn} aria-label="بحث">
             <Search size={18} />
           </button>
         </form>
 
-        {/* 4. Action Group */}
-        <div className={styles.actionsGroup}>
-          {/* Mobile Search Button (Phones only) */}
+        {/* 4. Action Buttons (Auth & Mobile Search Toggle) */}
+        <div className={styles.actionGroup}>
           <button
             type="button"
-            className={`${styles.mobileSearchBtn} ${isMobileSearchOpen ? styles.active : ""}`}
-            onClick={() => setIsMobileSearchOpen((prev) => !prev)}
-            aria-label="فتح حقل البحث"
+            className={styles.mobileSearchBtn}
+            onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+            aria-label="فتح شريط البحث"
           >
             {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
           </button>
 
-          {/* Login / Account Button */}
           <Link href="/login" className={styles.loginBtn}>
             <LogIn size={17} />
             <span>تسجيل الدخول</span>

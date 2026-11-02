@@ -1,28 +1,60 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Heart, Star, BookOpen } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Heart, Star, BookOpen, Trash2 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
+import { useLibrary } from "@/context/LibraryContext";
 import styles from "./BookCard.module.scss";
 
-interface BookCardProps {
+export interface BookCardProps {
   book: BookItem;
+  variant?: "default" | "library";
+  showReadAction?: boolean;
+  showRemoveButton?: boolean;
+  onRemove?: (bookId: string) => void;
+  onToggleFavorite?: (bookId: string, isFav: boolean) => void;
 }
 
-export const BookCard: React.FC<BookCardProps> = ({ book }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+export const BookCard: React.FC<BookCardProps> = ({
+  book,
+  variant = "default",
+  showReadAction = false,
+  showRemoveButton = false,
+  onRemove,
+  onToggleFavorite,
+}) => {
+  const router = useRouter();
+  const { isBookSaved, toggleSaveBook, removeBook } = useLibrary();
+  const isFavorite = isBookSaved(book.id);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite((prev) => !prev);
+    toggleSaveBook(book);
+    onToggleFavorite?.(book.id, !isFavorite);
   };
+
+  const handleRemove = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeBook(book.id);
+    onRemove?.(book.id);
+  };
+
+  const handleReadClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/reader/${book.id}`);
+  };
+
+  const isLibraryVariant = variant === "library" || showReadAction || showRemoveButton;
 
   return (
     <Link
       href={`/books/${encodeURIComponent(book.slug)}`}
-      className={styles.cardContainer}
+      className={`${styles.cardContainer} ${isLibraryVariant ? styles.libraryCard : ""}`}
       aria-label={`كتاب ${book.title} للمؤلف ${book.author}`}
     >
       {/* 1. Compact Cover Box with Unified Placeholder & Heart Button */}
@@ -37,7 +69,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           onClick={handleToggleFavorite}
           className={`${styles.favoriteBtn} ${isFavorite ? styles.active : ""}`}
           title={isFavorite ? "إزالة من مكتبتي" : "إضافة إلى مكتبتي"}
-          aria-label="حفظ في مكتبتي"
+          aria-label={isFavorite ? "إزالة من مكتبتي" : "حفظ في مكتبتي"}
         >
           <Heart
             size={14}
@@ -72,6 +104,31 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <span className={styles.ratingValue}>{book.rating}.0</span>
         </div>
       </div>
+
+      {/* 4. Optional Library Mode Actions (Read Now + Remove) */}
+      {isLibraryVariant && (
+        <div className={styles.libraryActions}>
+          <button
+            type="button"
+            onClick={handleReadClick}
+            className={styles.readNowBtn}
+            title="ابدأ قراءة الكتاب الآن"
+          >
+            <BookOpen size={13} />
+            <span>اقرأ الآن</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleRemove}
+            className={styles.removeBtn}
+            title="إزالة هذا الكتاب من مكتبتي"
+            aria-label="إزالة الكتاب"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      )}
     </Link>
   );
 };

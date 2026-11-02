@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
+import { LibraryProvider } from "@/context/LibraryContext";
 import "@/styles/global.scss";
 
 export const metadata: Metadata = {
@@ -22,11 +23,13 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl">
       <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <ScrollToTop />
-        <BottomNav />
+        <LibraryProvider>
+          <Header />
+          <main>{children}</main>
+          <Footer />
+          <ScrollToTop />
+          <BottomNav />
+        </LibraryProvider>
       </body>
     </html>
   );

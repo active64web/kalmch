@@ -1,74 +1,105 @@
 # المخطط المعماري للمشروع (Architecture & Conventions)
 
-## نظرة عامة
-تم تصميم معمارية المشروع لتكون معيارية ونظيفة (Feature-Driven Architecture) تضمن سهولة الصيانة وقابلية التوسع مع الحفاظ على بساطة الكود وسرعته.
+## 1. نظرة عامة
+تم تصميم معمارية منصة **قَلَم** لتكون معيارية ونظيفة (Feature-Driven Architecture) تضمن سهولة الصيانة وقابلية التوسع وسرعة التحميل العالية وتوافقاً تاماً مع أحدث معايير Next.js 16 و React 19.
 
 ---
 
-## تدفق البيانات (Data Flow)
+## 2. الهيكل الشجري للمشروع (File & Directory Structure)
 
-### المرحلة الحالية (Mock Phase):
 ```
-[src/data/ (Fake Data)] ──> [src/features/ or src/components/] ──> [src/app/ (Pages)]
-```
-
-### مرحلة الربط مع الـ API (Integration Phase):
-```
-[External API / Backend]
-        │
-        ▼
-[src/server/ (Central API Services & Controllers)]
-        │
-        ▼
-[src/features/ / Server Actions / Data Fetchers]
-        │
-        ▼
-[src/app/ (Rendered Pages)]
+kalmch/
+├── agent/                         # مرجع توثيق وقواعد وخطة المشروع
+│   ├── rules.md                   # القواعد الفنية والتصميمية الصارمة
+│   ├── architecture.md            # المخطط المعماري وتوزيع المجلدات
+│   └── plan.md                    # خطة التطوير والمراحل المنجزة
+├── public/                        # الملفات الثابتة (شعار المنصة، ملف PDF التجريبي)
+│   ├── logo.jpg
+│   └── sample-book.pdf
+├── src/
+│   ├── app/                       # نظام التوجيه Next.js App Router
+│   │   ├── layout.tsx             # التخطيط الجذري (الخط، المزودات، الهيدر، الفوتر، BottomNav)
+│   │   ├── page.tsx               # الصفحة الرئيسية
+│   │   ├── loading.tsx            # شاشة التحميل العامة ملء الشاشة
+│   │   ├── not-found.tsx          # صفحة الخطأ 404 المدمجة
+│   │   ├── robots.ts              # ملف robots.txt التلقائي للسيرفر
+│   │   ├── sitemap.ts             # خريطة الموقع sitemap.xml التلقائية
+│   │   ├── categories/            # دليل وتصنيفات الأقسام
+│   │   │   ├── page.tsx           # استعراض كل الأقسام
+│   │   │   └── [categorySlug]/
+│   │   │       ├── page.tsx       # كتب القسم المختار
+│   │   │       └── [bookSlug]/
+│   │   │           ├── page.tsx   # صفحة تفاصيل الكتاب
+│   │   │           └── read/
+│   │   │               └── page.tsx # قارئ الـ PDF المباشر
+│   │   ├── authors/               # دليل المؤلفين
+│   │   │   ├── page.tsx           # استعراض كافة المؤلفين
+│   │   │   └── [authorId]/
+│   │   │       └── page.tsx       # تفاصيل المؤلف ومؤلفاته
+│   │   ├── search/                # صفحة نتائج البحث
+│   │   │   └── page.tsx
+│   │   ├── my-library/            # مكتبتي المحفوظة
+│   │   │   └── page.tsx
+│   │   ├── contact/               # تواصل معنا
+│   │   │   └── page.tsx
+│   │   ├── login/                 # تسجيل الدخول
+│   │   │   └── page.tsx
+│   │   └── register/              # إنشاء حساب جديد
+│   │       └── page.tsx
+│   ├── components/                # المكونات القابلة لإعادة الاستخدام
+│   │   ├── common/                # مكونات عامة
+│   │   │   ├── AuthorCard/        # كارت المؤلف
+│   │   │   ├── BookCard/          # كارت الكتاب
+│   │   │   ├── CategoryCard/      # كارت القسم
+│   │   │   ├── GlobalCTA/         # شريط الدعوة للتفاعل الموحد
+│   │   │   ├── PageHeader/        # ترويسة الصفحات الموحدة مع Breadcrumbs
+│   │   │   ├── ScrollToTop/       # زر العودة لأعلى الصفحة
+│   │   │   └── SocialIcons/       # أيقونات وسائل التواصل الاجتماعي
+│   │   └── layout/                # مكونات الهيكل الأساسي
+│   │       ├── Header/            # الهيدر العايم التفاعلي وشريط البحث
+│   │       ├── Footer/            # الفوتر المعتمد
+│   │       └── BottomNav/         # شريط التنقل السفلي للهواتف
+│   ├── context/                   # سياق البيانات المشترك
+│   │   └── LibraryContext.tsx     # إدارة الكتب المفضلة عبر useSyncExternalStore
+│   ├── data/                      # البيانات المحلية والتجريبية (Mock Data)
+│   │   ├── authors.data.ts        # بيانات المؤلفين
+│   │   ├── books.data.ts          # بيانات الكتب
+│   │   └── categories.data.ts     # بيانات الأقسام والتصنيفات
+│   ├── features/                  # ميزات وصفحات معزولة داخلياً
+│   │   ├── auth/                  # نماذج تسجيل الدخول والتسجيل
+│   │   ├── book-details/          # عرض تفاصيل الكتاب
+│   │   ├── contact/               # نموذج ومعلومات التواصل
+│   │   ├── home/                  # سيكشنز الصفحة الرئيسية
+│   │   ├── library/               # إدارة وعرض مكتبتي
+│   │   └── reader/                # قارئ الـ PDF المباشر (PDF.js Canvas)
+│   ├── server/                    # نقطة الربط المستقبلية مع الباك إند
+│   │   ├── config/api-client.ts   # عميل الـ API المركزي
+│   │   ├── services/              # خدمات جلب البيانات
+│   │   └── types/                 # تعريفات البيانات والـ DTOs
+│   ├── styles/                    # الأنماط الشاملة
+│   │   └── global.scss            # المتغيرات الثلاثة وشبكة الحاويات
+│   └── utils/                     # الأدوات المساعدة
+│       └── seo.ts                 # معالج وتوليد الـ Metadata لمحركات البحث
 ```
 
 ---
 
-## تفاصيل مجلدات المشروع (Directory Breakdown)
+## 3. تدفق البيانات والـ State Management
+1. **المكتبة المفضلة (`LibraryContext`):**
+   - تعمل بنظام `useSyncExternalStore` للقراءة من `localStorage` والمزامنة عبر النوافذ في الوقت الحقيقي بدون أي Hydration Mismatch وبدون إعادة رندرة غير ضرورية.
+2. **الربط مع الـ Backend:**
+   - كافة النداءات الخارجية مهيأة في `src/server/` لعزل المنطق عن واجهات المستخدم.
+3. **توليد بيانات الـ SEO:**
+   - دالة `constructMetadata` في `src/utils/seo.ts` تزود Next.js ببيانات الـ OpenGraph والتويتر وروابط الكانونيكال وتوجيهات الروبوتات من جانب السيرفر (SSR).
 
-### 1. `src/app/`
-- يتبع نظام **Next.js App Router**.
-- كل مجلد يمثل مساراً (Route).
-- يحتوي على ملفات `page.tsx` و `layout.tsx`.
-- دور `page.tsx` مقتصر على جلب البيانات وتجميع الـ components الخاصة بالصفحة من `src/features/`.
+---
 
-### 2. `src/features/`
-- مجلد خاص بكل صفحة أو ميزة مستقلة (مثال: `home`, `books`, `book-details`, `categories`, `authors`...).
-- داخل كل مجلد في `features` توضع المكونات الفرعية التي تنتمي لهذه الصفحة حصراً.
-- مثال:
-  ```
-  src/features/
-  ├── home/
-  │   ├── HeroBanner/
-  │   ├── FeaturedBooks/
-  │   └── LatestReleases/
-  └── book-details/
-      ├── BookInfo/
-      └── RelatedBooks/
-  ```
-
-### 3. `src/components/`
-- المكونات العامة التي يمكن إعادة استخدامها عبر أكثر من صفحة:
-  - `components/layout/`: الهيدر (Header), الفوتر (Footer), القوائم الجانبية (Drawers / Menus).
-  - `components/common/`: الأزرار (Button), حقول الإدخال (Input / Select), البطاقات العامة (BookCard), النوافذ المنبثقة (Modals).
-
-### 4. `src/data/`
-- تخزين البيانات الوهمية (Mock / Seed Data).
-- تحتوي على ملفات TypeScript بصيغة كائنات ومصفوفات جاهزة لتمثيل الكتب، الأقسام، المؤلفين، والبيانات التعريفية.
-
-### 5. `src/server/`
-- مركز التحكم ونقطة الاتصال الوحيدة مع الـ API والخدمات الخارجية.
-- تنظيم استدعاءات الشبكة (API clients, fetch wrappers, error handling, caching).
-- عند التحول من البيانات الوهمية للربط الحي، يتم التبديل هنا دون الحاجة لإعادة كتابة مكونات الواجهة.
-
-### 6. `src/styles/`
-- ملف `global.scss` يحوي القواعد والتنسيقات الشاملة.
-- الالتزام التام بالمتغيرات الثلاثة:
-  - `--main_color`: `#C59B4E`
-  - `--secondary_color`: `#3D250C`
-  - `--therd_color`: `#543314`
-
+## 4. نظام الألوان والمتغيرات
+ممنوع إضافة متغيرات خارج المتغيرات الثلاثة الأساسية في `src/styles/global.scss`:
+```scss
+:root {
+  --main_color: #C59B4E;      /* ذهبي دافئ للريشة والإبرازات والنجوم */
+  --secondary_color: #3D250C; /* بني داكن وقور للعناوين والأزرار الأساسية */
+  --therd_color: #543314;     /* بني كستنائي غني للتدرجات والظلال */
+}
+```

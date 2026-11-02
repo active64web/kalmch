@@ -1,0 +1,119 @@
+.headerWrapper {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+  width: 100%;
+
+  /* On Mobile only: Center-aligned and stacked under each other */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+}
+
+.textGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  @media (max-width: 768px) {
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+}
+
+.badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--main_color);
+  background: #faf4e6;
+  padding: 3px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(197, 155, 78, 0.25);
+  margin-bottom: 2px;
+
+  @media (max-width: 768px) {
+    align-self: center;
+  }
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--secondary_color);
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 21px;
+  }
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(61, 37, 12, 0.7);
+  font-weight: 500;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 40px;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1.5px solid rgba(197, 155, 78, 0.35);
+  color: var(--secondary_color) !important;
+  font-size: 13.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.22s ease;
+  box-shadow: 0 2px 8px rgba(61, 37, 12, 0.04);
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: var(--main_color);
+    background: #faf4e6;
+    color: var(--secondary_color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(197, 155, 78, 0.16);
+
+    .arrow {
+      transform: translateX(-3px);
+      color: var(--main_color);
+    }
+  }
+
+  .arrow {
+    color: var(--secondary_color);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  @media (max-width: 768px) {
+    height: 36px;
+    padding: 0 18px;
+    font-size: 12.5px;
+    margin-top: 4px;
+  }
+}

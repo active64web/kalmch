@@ -7,6 +7,7 @@ export interface SectionHeaderProps {
   title: string;
   subtitle?: string;
   badge?: string;
+  align?: "start" | "center";
   action?: {
     label: string;
     href: string;
@@ -17,10 +18,15 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   title,
   subtitle,
   badge,
+  align = "start",
   action,
 }) => {
   return (
-    <div className={styles.headerWrapper}>
+    <div
+      className={`${styles.headerWrapper} ${
+        align === "center" ? styles.centered : ""
+      }`}
+    >
       <div className={styles.textGroup}>
         {badge && <span className={styles.badge}>{badge}</span>}
         <h2 className={styles.title}>{title}</h2>

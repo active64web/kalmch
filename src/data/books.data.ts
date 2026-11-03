@@ -6,10 +6,11 @@ export interface BookItem {
   authorId?: string;
   category: string;
   categorySlug: string;
-  coverImage: string;
+  coverImage?: string;
   rating: number; // e.g. 5 or 4.8
   reviewsCount?: number;
   pagesCount?: number;
+  readsCount?: number; // عدد المشاهدات والقراءات
   badge?: "جديد" | "حصري" | "الأكثر قراءة" | "مميز";
   section: "latest" | "recommended" | "popular" | "history" | "exclusive";
   pdfUrl?: string;
@@ -19,14 +20,31 @@ export interface BookItem {
 export const booksData: BookItem[] = [
   // 1. الأحدث (Latest)
   {
+    id: "b-hatshepsut",
+    slug: "ahebat-rajolan-hatshepsut",
+    title: "أحبت رجلاً وحكمت رجالاً - حتشبسوت",
+    author: "يونان جمال",
+    category: "تاريخ الكنيسة وسير الآباء",
+    categorySlug: "history",
+    coverImage: "/books/hatshepsut-cover.jpg",
+    rating: 5,
+    readsCount: 4280,
+    badge: "جديد",
+    section: "latest",
+    pagesCount: 184,
+    description:
+      "رواية تاريخية أدبية تستعرض السيرة الدرامية للملكة حتشبسوت، صراعات البلاط، والمسؤولية الكبرى لحكم مصر القديمة ومواجهة أزمات السلطة والتاج.",
+    pdfUrl: "/hatshepsut-novel.pdf",
+  },
+  {
     id: "b-1",
     slug: "spiritual-warfare",
     title: "حروب الشياطين وكيف ننتصر عليها",
     author: "قداسة البابا شنوده الثالث",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 3420,
     badge: "جديد",
     section: "latest",
   },
@@ -37,8 +55,8 @@ export const booksData: BookItem[] = [
     author: "الأب متى المسكين",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2890,
     section: "latest",
   },
   {
@@ -48,8 +66,8 @@ export const booksData: BookItem[] = [
     author: "القمص تادرس يعقوب ملطي",
     category: "تفاسير ودراسات",
     categorySlug: "biblical",
-    coverImage: "https://images.unsplash.com/photo-1532012164546-f432f2e3777f?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1750,
     section: "latest",
   },
   {
@@ -59,8 +77,8 @@ export const booksData: BookItem[] = [
     author: "الشماس منسى القمص",
     category: "تاريخ الكنيسة",
     categorySlug: "history",
-    coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1210,
     section: "latest",
   },
   {
@@ -70,8 +88,8 @@ export const booksData: BookItem[] = [
     author: "ترجمة د. جوزيف فالتس",
     category: "كتب آبائية",
     categorySlug: "patrology",
-    coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2150,
     badge: "جديد",
     section: "latest",
   },
@@ -82,8 +100,8 @@ export const booksData: BookItem[] = [
     author: "نيافة الأنبا رافائيل",
     category: "دراسات فكرية",
     categorySlug: "articles",
-    coverImage: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1840,
     section: "latest",
   },
 
@@ -95,8 +113,8 @@ export const booksData: BookItem[] = [
     author: "قداسة البابا شنوده الثالث",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2950,
     section: "recommended",
   },
   {
@@ -106,8 +124,8 @@ export const booksData: BookItem[] = [
     author: "الأب متى المسكين",
     category: "تاريخ الكنيسة",
     categorySlug: "history",
-    coverImage: "https://images.unsplash.com/photo-1519682337058-a94d519337bc?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1680,
     section: "recommended",
   },
   {
@@ -117,8 +135,8 @@ export const booksData: BookItem[] = [
     author: "القديس يوحنا ذهبي الفم",
     category: "كتب آبائية",
     categorySlug: "patrology",
-    coverImage: "https://images.unsplash.com/photo-1463320726281-696a485928c7?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2240,
     section: "recommended",
   },
   {
@@ -128,8 +146,8 @@ export const booksData: BookItem[] = [
     author: "القمص تادرس يعقوب ملطي",
     category: "تفاسير ودراسات",
     categorySlug: "biblical",
-    coverImage: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1980,
     section: "recommended",
   },
   {
@@ -139,8 +157,8 @@ export const booksData: BookItem[] = [
     author: "مكتبة المحبة",
     category: "تاريخ الكنيسة",
     categorySlug: "history",
-    coverImage: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 3120,
     section: "recommended",
   },
   {
@@ -150,8 +168,8 @@ export const booksData: BookItem[] = [
     author: "نيافة الأنبا رافائيل",
     category: "دراسات فكرية",
     categorySlug: "articles",
-    coverImage: "https://images.unsplash.com/photo-1507842229451-77b311746f33?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1470,
     section: "recommended",
   },
 
@@ -163,8 +181,8 @@ export const booksData: BookItem[] = [
     author: "قداسة البابا شنوده الثالث",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1491841573634-28140fc7ced7?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 4280,
     badge: "الأكثر قراءة",
     section: "popular",
   },
@@ -175,8 +193,8 @@ export const booksData: BookItem[] = [
     author: "الأب متى المسكين",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1529148482759-b35b2825750f?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 3860,
     badge: "الأكثر قراءة",
     section: "popular",
   },
@@ -187,8 +205,8 @@ export const booksData: BookItem[] = [
     author: "ترجمة القمص مرقس داود",
     category: "تاريخ الكنيسة",
     categorySlug: "history",
-    coverImage: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1950,
     section: "popular",
   },
   {
@@ -198,8 +216,8 @@ export const booksData: BookItem[] = [
     author: "القمص تادرس يعقوب ملطي",
     category: "تفاسير ودراسات",
     categorySlug: "biblical",
-    coverImage: "https://images.unsplash.com/photo-1495640388908-05fa85288e61?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2310,
     section: "popular",
   },
   {
@@ -209,8 +227,8 @@ export const booksData: BookItem[] = [
     author: "ترجمة د. نصحي عبد الشهيد",
     category: "كتب آبائية",
     categorySlug: "patrology",
-    coverImage: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2790,
     section: "popular",
   },
   {
@@ -220,8 +238,8 @@ export const booksData: BookItem[] = [
     author: "قداسة البابا شنوده الثالث",
     category: "كتب لاهوتية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1533669955142-6a73332af4db?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 3640,
     section: "popular",
   },
 
@@ -233,8 +251,8 @@ export const booksData: BookItem[] = [
     author: "إعداد لجنة التاريخ القبطي",
     category: "كتب آبائية",
     categorySlug: "patrology",
-    coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2580,
     badge: "حصري",
     section: "exclusive",
   },
@@ -245,8 +263,8 @@ export const booksData: BookItem[] = [
     author: "القمص تادرس يعقوب ملطي",
     category: "تفاسير ودراسات",
     categorySlug: "biblical",
-    coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1920,
     badge: "حصري",
     section: "exclusive",
   },
@@ -257,8 +275,8 @@ export const booksData: BookItem[] = [
     author: "قداسة البابا شنوده الثالث",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1532012164546-f432f2e3777f?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 3100,
     badge: "حصري",
     section: "exclusive",
   },
@@ -269,8 +287,8 @@ export const booksData: BookItem[] = [
     author: "مركز دراسات الآباء",
     category: "كتب آبائية",
     categorySlug: "patrology",
-    coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1430,
     badge: "حصري",
     section: "exclusive",
   },
@@ -281,8 +299,8 @@ export const booksData: BookItem[] = [
     author: "نيافة الأنبا بيشوي",
     category: "تاريخ الكنيسة",
     categorySlug: "history",
-    coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 1620,
     badge: "حصري",
     section: "exclusive",
   },
@@ -293,10 +311,9 @@ export const booksData: BookItem[] = [
     author: "الأب متى المسكين",
     category: "كتب روحية",
     categorySlug: "spiritual",
-    coverImage: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80",
     rating: 5,
+    readsCount: 2470,
     badge: "حصري",
     section: "exclusive",
   },
 ];
-

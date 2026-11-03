@@ -6,6 +6,26 @@
   margin-bottom: 32px;
   width: 100%;
 
+  &.centered {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    .textGroup {
+      align-items: center;
+      text-align: center;
+    }
+
+    .badge {
+      align-self: center;
+    }
+
+    .subtitle {
+      max-width: 620px;
+      margin-inline: auto;
+    }
+  }
+
   /* On Mobile only: Center-aligned and stacked under each other */
   @media (max-width: 768px) {
     flex-direction: column;

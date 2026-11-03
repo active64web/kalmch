@@ -156,7 +156,7 @@ export default async function AuthorDetailsPage({
         title="استكشف المزيد من أمهات الكتب المسيحية"
         description="آلاف العناوين والمؤلفات لآباء الكنيسة واللاهوتيين المعاصرين بانتظارك لتثري معرفتك الروحية والكنسية."
         primaryAction={{
-          label: "تصفح جميع المؤلفين",
+          label: "تصفح المؤلفين",
           href: "/authors",
         }}
         secondaryAction={{

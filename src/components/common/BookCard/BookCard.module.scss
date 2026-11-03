@@ -31,6 +31,10 @@
       box-shadow: 0 3px 10px rgba(197, 155, 78, 0.3);
     }
 
+    .hasPoster .coverPoster {
+      transform: scale(1.05);
+    }
+
     .bookTitle {
       color: var(--secondary_color);
     }
@@ -68,6 +72,22 @@
     border-radius: 7px;
     margin-bottom: 6px;
     aspect-ratio: 1 / 1.22;
+  }
+
+  &.hasPoster {
+    padding: 3px;
+    border: 1px solid rgba(197, 155, 78, 0.32);
+    background: radial-gradient(circle at 50% 40%, #ffffff 0%, #f7efe2 100%);
+
+    .coverPoster {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+      border-radius: 6px;
+      transition: transform 0.35s ease;
+    }
   }
 }
 
@@ -173,12 +193,20 @@
   }
 }
 
-/* 5. Rating Stars */
+/* 5. Rating Stars & Reads Count */
 .ratingRow {
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-top: 4px;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 5px;
+  width: 100%;
+}
+
+.starRating {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .starGroup {
@@ -204,6 +232,29 @@
   }
 }
 
+.readsCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(61, 37, 12, 0.65);
+  padding: 1.5px 6px;
+  background: rgba(197, 155, 78, 0.08);
+  border: 1px solid rgba(197, 155, 78, 0.2);
+  border-radius: 12px;
+  flex-shrink: 0;
+
+  .readsIcon {
+    color: var(--main_color);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 9px;
+    padding: 1px 4px;
+    gap: 2px;
+  }
+}
 
 /* 6. Library Mode Actions */
 .cardActions,

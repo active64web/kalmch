@@ -3,6 +3,7 @@ import { BASE_URL } from "@/utils/seo";
 import { categoriesData } from "@/data/categories.data";
 import { booksData } from "@/data/books.data";
 import { authorsData } from "@/data/authors.data";
+import { articlesData } from "@/data/articles.data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date().toISOString();
@@ -23,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/authors`,
+      lastModified: currentDate,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/articles`,
       lastModified: currentDate,
       changeFrequency: "weekly",
       priority: 0.9,
@@ -59,11 +66,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  // 5. Articles Detail Pages
+  const articleRoutes: MetadataRoute.Sitemap = articlesData.map((article) => ({
+    url: `${BASE_URL}/articles/${article.slug}`,
+    lastModified: currentDate,
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
   return [
     ...staticRoutes,
     ...categoryRoutes,
     ...bookRoutes,
     ...authorRoutes,
+    ...articleRoutes,
   ];
 }
-

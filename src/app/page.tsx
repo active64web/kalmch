@@ -3,7 +3,9 @@ import {
   HeroSection,
   CategoriesSection,
   BooksSection,
+  ArticlesSection,
   AuthorsSection,
+  VisitorsSection,
 } from "@/features/home";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
@@ -27,10 +29,12 @@ export const metadata: Metadata = constructMetadata({
 export default function Home() {
   return (
     <div className="page-main-wrapper">
-      <HeroSection />
+      <HeroSection imageSrc="/hero-artwork.jpg" />
       <CategoriesSection />
       <BooksSection />
+      <ArticlesSection />
       <AuthorsSection />
+      <VisitorsSection />
       <GlobalCTA
         badge="انضم إلى عائلة قَلَم"
         title="هل لديك مؤلفات أو دراسات مسيحية ترغب في نشرها؟"

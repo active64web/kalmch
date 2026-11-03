@@ -5,8 +5,8 @@ import { booksData } from "@/data/books.data";
 import styles from "./BooksSection.module.scss";
 
 export const BooksSection: React.FC = () => {
-  // Take 15 latest books (5 per row x 3 rows)
-  const latest15Books = booksData.slice(0, 15);
+  // Take 10 latest books (5 per row x 2 rows)
+  const latest10Books = booksData.slice(0, 10);
 
   return (
     <section className={styles.sectionWrapper} aria-label="أحدث الكتب">
@@ -21,7 +21,7 @@ export const BooksSection: React.FC = () => {
         />
 
         <div className={styles.booksGrid}>
-          {latest15Books.map((book) => (
+          {latest10Books.map((book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { AuthorCard } from "@/components/common/AuthorCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
+import styles from "./AuthorsPage.module.scss";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -40,14 +41,7 @@ export default function AuthorsPage() {
       {/* 2. Authors Grid */}
       <section aria-label="قائمة المؤلفين">
         <div className="container">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "20px",
-              width: "100%",
-            }}
-          >
+          <div className={styles.authorsGrid}>
             {authorsData.map((author) => (
               <AuthorCard key={author.id} author={author} />
             ))}
@@ -61,7 +55,7 @@ export default function AuthorsPage() {
         title="هل أنت كاتب أو باحث في العلوم الكنسية؟"
         description="انضم إلى نخبة الكتّاب والمؤلفين على منصة قَلَم وانشر أبحاثك ودراساتك لتصل إلى آلاف القرّاء والباحثين حول العالم."
         primaryAction={{
-          label: "تواصل معنا للنشر",
+          label: "تواصل معنا",
           href: "/contact",
         }}
         secondaryAction={{

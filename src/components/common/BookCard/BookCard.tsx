@@ -2,7 +2,7 @@
 
 import React, { memo } from "react";
 import Link from "next/link";
-import { Heart, Star, BookOpen, Trash2 } from "lucide-react";
+import { Heart, Star, BookOpen, Trash2, Eye } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
 import styles from "./BookCard.module.scss";
@@ -44,16 +44,33 @@ const BookCardComponent: React.FC<BookCardProps> = ({
     book.categorySlug
   )}/${encodeURIComponent(book.slug)}`;
 
+  const reads = book.readsCount || 1250;
+  const formattedReads = reads.toLocaleString("en-US");
+
   return (
     <div
       className={styles.cardContainer}
       aria-label={`كتاب ${book.title} للمؤلف ${book.author}`}
     >
-      {/* 1. Compact Cover Box with Independent Favorite Button */}
-      <div className={styles.coverBox}>
-        <div className={styles.placeholderIconBox} aria-hidden="true">
-          <BookOpen size={20} />
-        </div>
+      {/* 1. Compact Cover Box with Poster support and Independent Favorite Button */}
+      <div
+        className={`${styles.coverBox} ${
+          book.coverImage ? styles.hasPoster : ""
+        }`}
+      >
+        {book.coverImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={book.coverImage}
+            alt={book.title}
+            className={styles.coverPoster}
+            loading="lazy"
+          />
+        ) : (
+          <div className={styles.placeholderIconBox} aria-hidden="true">
+            <BookOpen size={20} />
+          </div>
+        )}
 
         {/* Floating Heart / Favorite Button */}
         <button
@@ -81,20 +98,30 @@ const BookCardComponent: React.FC<BookCardProps> = ({
           {book.author}
         </p>
 
-        {/* 3. Star Rating */}
-        <div className={styles.ratingRow} aria-label={`تقييم 5 نجوم`}>
-          <div className={styles.starGroup}>
-            {[...Array(5)].map((_, idx) => (
-              <Star
-                key={idx}
-                size={11}
-                className={styles.starIcon}
-                fill="var(--main_color)"
-                color="var(--main_color)"
-              />
-            ))}
+        {/* 3. Star Rating & Reads/Views Count */}
+        <div className={styles.ratingRow}>
+          <div className={styles.starRating} aria-label={`تقييم 5 نجوم`}>
+            <div className={styles.starGroup}>
+              {[...Array(5)].map((_, idx) => (
+                <Star
+                  key={idx}
+                  size={11}
+                  className={styles.starIcon}
+                  fill="var(--main_color)"
+                  color="var(--main_color)"
+                />
+              ))}
+            </div>
+            <span className={styles.ratingValue}>{book.rating || 5}.0</span>
           </div>
-          <span className={styles.ratingValue}>{book.rating || 5}.0</span>
+
+          <div
+            className={styles.readsCount}
+            title={`${reads.toLocaleString("en-US")} قراءة`}
+          >
+            <Eye size={12} className={styles.readsIcon} />
+            <span>{formattedReads}</span>
+          </div>
         </div>
       </div>
 

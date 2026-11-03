@@ -10,6 +10,7 @@ import {
   Share2,
   Check,
   Star,
+  Eye,
 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
@@ -27,6 +28,8 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
   const defaultDescription =
     book.description ||
     `يُعد كتاب "${book.title}" للمؤلف ${book.author} من المؤلفات الروحية والدراسية القيّمة في التراث الكنسي والمكتبة المسيحية. يتناول الكتاب أبعاداً روحية وعقائدية عميقة تهدف إلى بناء الفكر القويم، وترسيخ أصول الحياة الروحية وحياة الصلاة والفضيلة، وتقديم إرشادات نافعة لكل مؤمن يبحث عن النمو الروحي والمعرفة الحقيقية.`;
+
+  const reads = book.readsCount || 1250;
 
   const handleShare = () => {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -50,10 +53,23 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
       <div className={styles.detailsCard}>
         {/* Cover Section */}
         <div className={styles.coverColumn}>
-          <div className={styles.coverBox}>
-            <div className={styles.placeholderIconBox} aria-hidden="true">
-              <BookOpen size={48} className={styles.bookIcon} />
-            </div>
+          <div
+            className={`${styles.coverBox} ${
+              book.coverImage ? styles.hasPoster : ""
+            }`}
+          >
+            {book.coverImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={book.coverImage}
+                alt={book.title}
+                className={styles.coverPoster}
+              />
+            ) : (
+              <div className={styles.placeholderIconBox} aria-hidden="true">
+                <BookOpen size={48} className={styles.bookIcon} />
+              </div>
+            )}
 
             {/* Quick Favorite Icon on Cover */}
             <button
@@ -88,7 +104,7 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
             <strong>{book.author}</strong>
           </p>
 
-          {/* Star Rating Row */}
+          {/* Star Rating & Reads Row */}
           <div
             className={styles.ratingRow}
             aria-label={`تقييم ${book.rating || 5} من 5 نجوم`}
@@ -105,9 +121,19 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
               ))}
             </div>
             <span className={styles.ratingValue}>{book.rating || 5}.0</span>
+
+            <span className={styles.dotDivider}>•</span>
+
+            <div
+              className={styles.readsCountBadge}
+              title={`${reads.toLocaleString("en-US")} قراءة ومطالعة`}
+            >
+              <Eye size={15} className={styles.readsIcon} />
+              <span>{reads.toLocaleString("en-US")} قراءة</span>
+            </div>
           </div>
 
-          {/* Spec Pills (Pages, Language) - Format box removed as requested */}
+          {/* Spec Pills (Pages, Language) */}
           <div className={styles.specPillsGrid}>
             <div className={styles.specPill}>
               <FileText size={15} className={styles.pillIcon} />

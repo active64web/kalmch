@@ -53,7 +53,7 @@ export async function generateMetadata({
       book.author,
       book.category,
       "قراءة كتاب",
-      "تحميل كتاب",
+      "مطالعة كتب",
       "كتب مسيحية",
       "منصة قلم",
     ],
@@ -102,9 +102,9 @@ export default async function BookDetailPage({ params }: BookPageProps) {
       <GlobalCTA
         badge="استمر في رحلة القراءة"
         title="هل تبحث عن مؤلفات أخرى في نفس الموضوع؟"
-        description="تضم منصة قَلَم مئات المؤلفات والدراسات المسيحية الأصيلة المتاحة للمطالعة والتحميل المباشر."
+        description="تضم منصة قَلَم مئات المؤلفات والدراسات المسيحية الأصيلة المتاحة للمطالعة والقراءة المباشرة على الموقع."
         primaryAction={{
-          label: "تصفح كافة الأقسام",
+          label: "تصفح الأقسام",
           href: "/categories",
         }}
         secondaryAction={{

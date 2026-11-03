@@ -4,14 +4,14 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, LogIn, X } from "lucide-react";
+import { Search, LogIn, X, Bookmark } from "lucide-react";
 import styles from "./Header.module.scss";
 
 const navLinks = [
   { label: "الرئيسية", href: "/" },
-  { label: "مكتبتى", href: "/my-library" },
   { label: "الاقسام", href: "/categories" },
   { label: "المؤلفين", href: "/authors" },
+  { label: "المقالات", href: "/articles" },
   { label: "تواصل معنا", href: "/contact" },
 ];
 
@@ -141,20 +141,37 @@ export const Header: React.FC = () => {
           </button>
         </form>
 
-        {/* 4. Action Buttons (Auth & Mobile Search Toggle) */}
+        {/* 4. Action Buttons (Search Toggle on Mobile, My Library Icon, Login) */}
         <div className={styles.actionsGroup}>
           <button
             type="button"
             className={styles.mobileSearchBtn}
             onClick={toggleMobileSearch}
             aria-label={isMobileSearchOpen ? "إغلاق شريط البحث" : "فتح شريط البحث"}
+            title="البحث"
           >
-            {isMobileSearchOpen ? <X size={20} /> : <Search size={20} />}
+            {isMobileSearchOpen ? <X size={19} /> : <Search size={19} />}
           </button>
 
-          <Link href="/login" className={styles.loginBtn}>
+          <Link
+            href="/my-library"
+            className={`${styles.libraryBtn} ${
+              pathname.startsWith("/my-library") ? styles.active : ""
+            }`}
+            title="مكتبتي"
+            aria-label="مكتبتي"
+          >
+            <Bookmark size={18} />
+          </Link>
+
+          <Link
+            href="/login"
+            className={styles.loginBtn}
+            title="تسجيل الدخول"
+            aria-label="تسجيل الدخول"
+          >
             <LogIn size={17} />
-            <span>تسجيل الدخول</span>
+            <span className={styles.loginText}>تسجيل الدخول</span>
           </Link>
         </div>
       </div>

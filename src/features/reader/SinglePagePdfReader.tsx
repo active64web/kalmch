@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   Loader2,
   ExternalLink,
+  BookOpen,
 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
@@ -32,6 +33,12 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   const [pageInput, setPageInput] = useState<string>("1");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isAndroid] = useState<boolean>(() => {
+    if (typeof navigator !== "undefined") {
+      return /android/i.test(navigator.userAgent);
+    }
+    return false;
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const goToPage = useCallback(
@@ -111,19 +118,22 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
     };
   }, []);
 
-  // Resolves the exact single-page PDF to guarantee page jumping on iPhone and all devices
+  const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
+
+  // For Android, point to the full PDF so opening in a new tab has full 129 pages scroll
+  // For iOS/Desktop, point to individual page for instant single-page presentation
   const getPageUrl = (pageNum: number) => {
+    if (isAndroid) {
+      return fullPdfUrl;
+    }
     if (
       book.id === "b-hatshepsut" ||
       book.slug === "ahebat-rajolan-hatshepsut"
     ) {
       return `/books/hatshepsut-pages/page-${pageNum}.pdf#view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
     }
-    const basePdf = book.pdfUrl || "/hatshepsut-novel.pdf";
-    return `${basePdf}#page=${pageNum}&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
+    return `${fullPdfUrl}#page=${pageNum}&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
   };
-
-  const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
 
   return (
     <div
@@ -132,7 +142,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
         isFullscreen ? styles.fullscreenMode : ""
       }`}
     >
-      {/* 1. Header Toolbar (Clean and spacious) */}
+      {/* 1. Header Toolbar */}
       <header className={styles.readerToolbar}>
         <div className={styles.toolbarStart}>
           <Link
@@ -154,48 +164,50 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
 
         <div className={styles.toolbarActions}>
           {/* Page Navigation Controls */}
-          <div className={styles.pageNavigator} title="تقليب صفحات الكتاب">
-            <button
-              type="button"
-              onClick={prevPage}
-              disabled={page <= 1}
-              className={styles.pageNavBtn}
-              title="الصفحة السابقة"
-              aria-label="الانتقال إلى الصفحة السابقة"
-            >
-              <ChevronRight size={16} />
-              <span className={styles.pageNavText}>السابقة</span>
-            </button>
+          {!isAndroid && (
+            <div className={styles.pageNavigator} title="تقليب صفحات الكتاب">
+              <button
+                type="button"
+                onClick={prevPage}
+                disabled={page <= 1}
+                className={styles.pageNavBtn}
+                title="الصفحة السابقة"
+                aria-label="الانتقال إلى الصفحة السابقة"
+              >
+                <ChevronRight size={16} />
+                <span className={styles.pageNavText}>السابقة</span>
+              </button>
 
-            <form
-              onSubmit={handlePageInputSubmit}
-              className={styles.pageIndicator}
-            >
-              <input
-                type="number"
-                min={1}
-                max={totalPages}
-                value={pageInput}
-                onChange={(e) => setPageInput(e.target.value)}
-                onBlur={handlePageInputSubmit}
-                className={styles.pageInput}
-                aria-label="رقم الصفحة الحالية"
-              />
-              <span className={styles.totalPagesLabel}>/ {totalPages}</span>
-            </form>
+              <form
+                onSubmit={handlePageInputSubmit}
+                className={styles.pageIndicator}
+              >
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={pageInput}
+                  onChange={(e) => setPageInput(e.target.value)}
+                  onBlur={handlePageInputSubmit}
+                  className={styles.pageInput}
+                  aria-label="رقم الصفحة الحالية"
+                />
+                <span className={styles.totalPagesLabel}>/ {totalPages}</span>
+              </form>
 
-            <button
-              type="button"
-              onClick={nextPage}
-              disabled={page >= totalPages}
-              className={styles.pageNavBtn}
-              title="الصفحة التالية"
-              aria-label="الانتقال إلى الصفحة التالية"
-            >
-              <span className={styles.pageNavText}>التالية</span>
-              <ChevronLeft size={16} />
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={nextPage}
+                disabled={page >= totalPages}
+                className={styles.pageNavBtn}
+                title="الصفحة التالية"
+                aria-label="الانتقال إلى الصفحة التالية"
+              >
+                <span className={styles.pageNavText}>التالية</span>
+                <ChevronLeft size={16} />
+              </button>
+            </div>
+          )}
 
           {/* Favorite Toggle */}
           <button
@@ -216,17 +228,17 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
-          {/* Direct Open in external tab */}
+          {/* Direct Open Full Book in external tab (All 129 pages with scroll) */}
           <a
             href={fullPdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.toolBtn}
-            title="فتح الكتاب كاملاً في نافذة خارجية"
-            aria-label="فتح الكتاب كاملاً في نافذة خارجية"
+            title="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
+            aria-label="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
           >
             <ExternalLink size={15} />
-            <span className={styles.btnLabel}>فتح كامل</span>
+            <span className={styles.btnLabel}>فتح الكتاب كاملاً</span>
           </a>
 
           {/* Fullscreen Toggle */}
@@ -241,22 +253,45 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
         </div>
       </header>
 
-      {/* 2. Single Page Stage: Strictly 1 page fitted with exact aspect ratio and zero internal scroll */}
+      {/* 2. Single Page Stage */}
       <div className={styles.singlePageStage}>
         <div className={styles.pageBox}>
-          <div className={styles.iframeClipWrapper}>
-            <iframe
-              key={page}
-              src={getPageUrl(page)}
-              title={`قراءة ${book.title} - صفحة ${page}`}
-              className={styles.pdfIframe}
-              scrolling="no"
-              onLoad={() => setIsLoading(false)}
-            />
-          </div>
+          {/* Android Dedicated Clean Prompt Card */}
+          {isAndroid ? (
+            <div className={styles.androidPromptOverlay}>
+              <div className={styles.androidPromptCard}>
+                <BookOpen size={36} color="var(--main_color)" />
+                <h3>قراءة الرواية كاملة ({totalPages} صفحة)</h3>
+                <p>
+                  نظام أندرويد يفتح ملفات الـ PDF في نافذة مستقلة تتيح لك التمرير
+                  الكامل بين جميع الـ {totalPages} صفحة بكل سلاسة وسرعة.
+                </p>
+                <a
+                  href={fullPdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.androidPrimaryBtn}
+                >
+                  <ExternalLink size={17} />
+                  <span>فتح الرواية كاملة والتمرير</span>
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className={styles.iframeClipWrapper}>
+              <iframe
+                key={page}
+                src={getPageUrl(page)}
+                title={`قراءة ${book.title} - صفحة ${page}`}
+                className={styles.pdfIframe}
+                scrolling="no"
+                onLoad={() => setIsLoading(false)}
+              />
+            </div>
+          )}
 
           {/* Stable Loading Overlay: Matches exact box size, page never jumps */}
-          {isLoading && (
+          {isLoading && !isAndroid && (
             <div className={styles.boxLoadingOverlay} aria-hidden="true">
               <div className={styles.loadingPill}>
                 <Loader2 size={22} className={styles.spinner} />

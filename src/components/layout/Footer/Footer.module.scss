@@ -12,10 +12,13 @@
   padding-top: 60px;
   padding-bottom: 40px;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 320px;
 
   @media (max-width: 768px) {
     padding-top: 44px;
     padding-bottom: 110px; // Generous comfortable breathing room above mobile BottomNav
+    contain-intrinsic-size: 1px 380px;
   }
 }
 

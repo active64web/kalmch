@@ -8,15 +8,15 @@ import { LibraryProvider } from "@/context/LibraryContext";
 import { BASE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "@/utils/seo";
 import "@/styles/global.scss";
 
-// Ensure all routes are dynamic and fresh without static caching
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Revalidate static pages hourly for top performance and instant TTFB
+export const revalidate = 3600;
 
 const almarai = Almarai({
   subsets: ["arabic"],
-  weight: ["300", "400", "700", "800"],
+  weight: ["400", "700", "800"],
   variable: "--font-ar",
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, Users, Feather, ScrollText, BookMarked } from "lucide-react";
 import styles from "./HeroSection.module.scss";
@@ -89,11 +90,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ imageSrc }) => {
                 }`}
               >
                 {imageSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={imageSrc}
                     alt="منصة قَلَم للمكتبة المسيحية"
+                    width={446}
+                    height={388}
+                    priority
+                    fetchPriority="high"
                     className={styles.heroImage}
+                    sizes="(max-width: 768px) 306px, (max-width: 992px) 346px, 446px"
                   />
                 ) : (
                   <div className={styles.placeholderArtwork} aria-hidden="true">

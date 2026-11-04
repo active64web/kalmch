@@ -82,7 +82,7 @@ export default async function ReaderPage({ params }: ReaderPageProps) {
         title="احفظ الكتاب وتابع القراءة في أي وقت"
         description="تتيح لك منصة قَلَم إضافة الكتب إلى مكتبتك الشخصية للرجوع إليها ومواصلة رحلتك القرائية بكل سهولة."
         primaryAction={{
-          label: "استكشف مكتبتي",
+          label: "مكتبتي",
           href: "/my-library",
         }}
         secondaryAction={{

@@ -7,9 +7,6 @@
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 4px 24px rgba(61, 37, 12, 0.05);
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
 
   &.fullscreenMode {
     position: fixed;
@@ -21,6 +18,7 @@
     border-radius: 0;
     height: 100vh;
     border: none;
+    background: #1c1611;
   }
 }
 
@@ -28,24 +26,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 12px 18px;
   background: #fdfbf7;
   border-bottom: 1px solid rgba(197, 155, 78, 0.22);
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
-    padding: 10px 14px;
-    gap: 10px;
+    padding: 10px 12px;
+    gap: 8px;
   }
 }
 
 .toolbarStart {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   flex: 1;
-  min-width: 220px;
+  min-width: 180px;
 }
 
 .backLink {
@@ -68,6 +66,11 @@
     color: #ffffff;
     border-color: var(--main_color);
   }
+
+  @media (max-width: 600px) {
+    padding: 5px 8px;
+    font-size: 11.5px;
+  }
 }
 
 .bookMetaHeader {
@@ -78,7 +81,7 @@
 }
 
 .headerTitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--secondary_color);
   margin: 0;
@@ -87,16 +90,16 @@
   text-overflow: ellipsis;
 
   @media (max-width: 768px) {
-    font-size: 14px;
+    font-size: 13.5px;
   }
 }
 
 .headerAuthor {
-  font-size: 12.5px;
+  font-size: 12px;
   color: rgba(61, 37, 12, 0.65);
   white-space: nowrap;
 
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     display: none;
   }
 }
@@ -106,13 +109,19 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    gap: 6px;
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
-/* Zoom Controls (Zoom In / Out only, without download button) */
-.zoomControls {
+/* Page Navigation Controls */
+.pageNavigator {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   background: #ffffff;
   border: 1px solid rgba(197, 155, 78, 0.28);
   border-radius: 8px;
@@ -120,57 +129,82 @@
   box-shadow: 0 1px 4px rgba(61, 37, 12, 0.04);
 }
 
-.zoomBtn {
-  display: flex;
+.pageNavBtn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: 6px;
-  border: none;
-  background: transparent;
+  border: 1px solid transparent;
+  background: #fdfbf7;
   color: var(--secondary_color);
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.18s ease;
 
   &:hover:not(:disabled) {
-    background: rgba(197, 155, 78, 0.16);
-    color: var(--main_color);
+    background: var(--main_color);
+    color: #ffffff;
+    border-color: var(--main_color);
   }
 
   &:disabled {
     opacity: 0.35;
     cursor: not-allowed;
   }
+
+  @media (max-width: 480px) {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
 }
 
-.zoomValue {
-  font-size: 11.5px;
+.pageNavText {
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.pageIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.pageInput {
+  width: 40px;
+  height: 25px;
+  border-radius: 5px;
+  border: 1px solid rgba(197, 155, 78, 0.35);
+  background: #fdfbf7;
+  text-align: center;
+  font-size: 12px;
   font-weight: 700;
   color: var(--secondary_color);
-  min-width: 36px;
-  text-align: center;
-  user-select: none;
+  padding: 0 2px;
+  appearance: textfield;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &:focus {
+    border-color: var(--main_color);
+    background: #ffffff;
+    outline: none;
+  }
 }
 
-.zoomResetBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  border: none;
-  background: rgba(197, 155, 78, 0.1);
-  color: var(--secondary_color);
-  cursor: pointer;
-  margin-inline-start: 2px;
-  transition: all 0.18s ease;
-
-  &:hover {
-    background: var(--main_color);
-    color: #ffffff;
-  }
+.totalPagesLabel {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(61, 37, 12, 0.65);
+  white-space: nowrap;
 }
 
 .toolBtn {
@@ -200,12 +234,12 @@
   }
 
   @media (max-width: 600px) {
-    padding: 6px 8px;
+    padding: 5px 8px;
   }
 }
 
 .btnLabel {
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     display: none;
   }
 }
@@ -214,31 +248,145 @@
   padding: 6px 10px;
 }
 
-/* Native PDF Iframe Container */
-.iframeContainer {
+/* 2. Single Page Stage */
+.singlePageStage {
   position: relative;
   width: 100%;
-  height: 82vh;
-  min-height: 650px;
-  background: #2b2621;
+  background: #2b231c;
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
 
   .fullscreenMode & {
-    height: calc(100vh - 65px);
-    min-height: calc(100vh - 65px);
+    padding: 10px 8px !important;
+    height: calc(100vh - 65px) !important;
+    max-height: calc(100vh - 65px) !important;
+    background: #1c1611 !important;
   }
 
   @media (max-width: 768px) {
-    height: 78vh;
-    min-height: 480px;
+    padding: 14px 8px;
   }
 }
 
-.pdfIframe {
+/* Fixed-ratio Single Page Box: Exactly 1 page, perfectly fitted (ratio: 411 / 609 = 0.6744) */
+.pageBox {
+  position: relative;
   width: 100%;
+  max-width: 530px;
+  aspect-ratio: 411 / 609;
+  max-height: 80vh;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    max-width: 420px;
+    max-height: 72vh;
+  }
+
+  /* Fullscreen Mode (Both Mobile and Desktop): Strictly 1 page fitted by aspect-ratio */
+  .fullscreenMode & {
+    width: auto !important;
+    height: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 80px) !important;
+    aspect-ratio: 411 / 609 !important;
+    margin: auto;
+    border-radius: 6px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Clips the native scrollbar outside the box */
+.iframeClipWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  direction: ltr;
+  /* Keeps iframe aligned to left and clips right edge */
+}
+
+.pdfIframe {
+  width: calc(100% + 24px);
+  /* Pushes the right scrollbar 24px outside the clipped box */
   height: 100%;
   border: none;
   display: block;
   background: #ffffff;
+  pointer-events: none;
+  /* Completely disables internal mouse-wheel and touch scroll! Zero scroll inside PDF! */
+}
+
+/* Stable Overlay: Matches exact box size, page never jumps */
+.boxLoadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 10;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.loadingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  box-shadow: 0 6px 24px rgba(61, 37, 12, 0.15);
+  border: 1px solid rgba(197, 155, 78, 0.35);
+}
+
+.loadingPillText {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--secondary_color);
+}
+
+/* Global Loading & Error States */
+.loadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 580px;
+  width: 100%;
+  color: #ffd988;
+  text-align: center;
+  padding: 40px 20px;
+  background: #2b231c;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--main_color);
+}
+
+.loadingText {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f7efe2;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

@@ -31,7 +31,7 @@ export const booksData: BookItem[] = [
     readsCount: 4280,
     badge: "جديد",
     section: "latest",
-    pagesCount: 184,
+    pagesCount: 129,
     description:
       "رواية تاريخية أدبية تستعرض السيرة الدرامية للملكة حتشبسوت، صراعات البلاط، والمسؤولية الكبرى لحكم مصر القديمة ومواجهة أزمات السلطة والتاج.",
     pdfUrl: "/hatshepsut-novel.pdf",

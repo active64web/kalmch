@@ -82,7 +82,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 800);
+    }, 600);
     return () => clearTimeout(timer);
   }, [page]);
 
@@ -111,9 +111,19 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
     };
   }, []);
 
-  const basePdf = book.pdfUrl || "/hatshepsut-novel.pdf";
-  // Direct native rendering: exactly 1 page fitted with view=Fit, no toolbars, no scrollbars
-  const pdfViewerUrl = `${basePdf}#page=${page}&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
+  // Resolves the exact single-page PDF to guarantee page jumping on iPhone and all devices
+  const getPageUrl = (pageNum: number) => {
+    if (
+      book.id === "b-hatshepsut" ||
+      book.slug === "ahebat-rajolan-hatshepsut"
+    ) {
+      return `/books/hatshepsut-pages/page-${pageNum}.pdf#view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
+    }
+    const basePdf = book.pdfUrl || "/hatshepsut-novel.pdf";
+    return `${basePdf}#page=${pageNum}&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
+  };
+
+  const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
 
   return (
     <div
@@ -122,7 +132,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
         isFullscreen ? styles.fullscreenMode : ""
       }`}
     >
-      {/* 1. Header Toolbar (Clean, without zoom controls) */}
+      {/* 1. Header Toolbar (Clean and spacious) */}
       <header className={styles.readerToolbar}>
         <div className={styles.toolbarStart}>
           <Link
@@ -206,17 +216,17 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
-          {/* Direct Open in external tab for Android / mobile browsers */}
+          {/* Direct Open in external tab */}
           <a
-            href={basePdf}
+            href={fullPdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.toolBtn}
-            title="فتح الكتاب في نافذة كاملة خارجية"
-            aria-label="فتح الكتاب في نافذة كاملة خارجية"
+            title="فتح الكتاب كاملاً في نافذة خارجية"
+            aria-label="فتح الكتاب كاملاً في نافذة خارجية"
           >
             <ExternalLink size={15} />
-            <span className={styles.btnLabel}>فتح خارجي</span>
+            <span className={styles.btnLabel}>فتح كامل</span>
           </a>
 
           {/* Fullscreen Toggle */}
@@ -237,7 +247,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
           <div className={styles.iframeClipWrapper}>
             <iframe
               key={page}
-              src={pdfViewerUrl}
+              src={getPageUrl(page)}
               title={`قراءة ${book.title} - صفحة ${page}`}
               className={styles.pdfIframe}
               scrolling="no"

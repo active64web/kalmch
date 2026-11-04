@@ -27,19 +27,35 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   const { isBookSaved, toggleSaveBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
 
-  // Exact page count (129 for hatshepsut)
   const totalPages = book.pagesCount || 129;
   const [page, setPage] = useState<number>(1);
   const [pageInput, setPageInput] = useState<string>("1");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isAndroid] = useState<boolean>(() => {
-    if (typeof navigator !== "undefined") {
-      return /android/i.test(navigator.userAgent);
+
+  // Detect mobile (screen width <= 768px or mobile devices)
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return (
+        window.innerWidth <= 768 ||
+        /android|iphone|ipad|ipod/i.test(navigator.userAgent)
+      );
     }
     return false;
   });
+
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(
+        window.innerWidth <= 768 ||
+          /android|iphone|ipad|ipod/i.test(navigator.userAgent)
+      );
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const goToPage = useCallback(
     (target: number) => {
@@ -71,7 +87,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
     }
   };
 
-  // Keyboard navigation: Left Arrow = Next page, Right Arrow = Previous page
+  // Keyboard navigation on desktop: Left Arrow = Next page, Right Arrow = Previous page
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === "INPUT") return;
@@ -119,23 +135,10 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   }, []);
 
   const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
-  // Append toolbar=0 and navpanes=0 to hide download and print bars in supported browser viewers
+  // External link with hidden toolbars
   const externalViewUrl = `${fullPdfUrl}#toolbar=0&navpanes=0`;
-
-  // For Android, point to the full PDF so opening in a new tab has full 129 pages scroll
-  // For iOS/Desktop, point to individual page for instant single-page presentation
-  const getPageUrl = (pageNum: number) => {
-    if (isAndroid) {
-      return externalViewUrl;
-    }
-    if (
-      book.id === "b-hatshepsut" ||
-      book.slug === "ahebat-rajolan-hatshepsut"
-    ) {
-      return `/books/hatshepsut-pages/page-${pageNum}.pdf#view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
-    }
-    return `${fullPdfUrl}#page=${pageNum}&view=Fit&toolbar=0&navpanes=0&scrollbar=0`;
-  };
+  // On desktop: full book with normal continuous scroll (scrollbar=1) and FitH
+  const desktopPdfUrl = `${fullPdfUrl}#page=${page}&view=FitH&toolbar=0&navpanes=0&scrollbar=1`;
 
   return (
     <div
@@ -165,8 +168,8 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
         </div>
 
         <div className={styles.toolbarActions}>
-          {/* Page Navigation Controls */}
-          {!isAndroid && (
+          {/* Page Navigation Controls on Desktop */}
+          {!isMobile && (
             <div className={styles.pageNavigator} title="تقليب صفحات الكتاب">
               <button
                 type="button"
@@ -230,14 +233,14 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
-          {/* Direct Open Full Book in external tab (All 129 pages with scroll, toolbar hidden) */}
+          {/* Direct Open in external tab */}
           <a
             href={externalViewUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.toolBtn}
-            title="فتح الكتاب كاملاً في نافذة خارجية"
-            aria-label="فتح الكتاب كاملاً في نافذة خارجية"
+            title="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
+            aria-label="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
           >
             <ExternalLink size={15} />
             <span className={styles.btnLabel}>فتح الكتاب كاملاً</span>
@@ -255,18 +258,18 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
         </div>
       </header>
 
-      {/* 2. Single Page Stage */}
+      {/* 2. Reader Stage */}
       <div className={styles.singlePageStage}>
         <div className={styles.pageBox}>
-          {/* Android Dedicated Clean Prompt Card */}
-          {isAndroid ? (
+          {/* Mobile: Clean, branded card that opens in a new tab */}
+          {isMobile ? (
             <div className={styles.androidPromptOverlay}>
               <div className={styles.androidPromptCard}>
-                <BookOpen size={36} color="var(--main_color)" />
+                <BookOpen size={40} color="var(--main_color)" />
                 <h3>قراءة الرواية كاملة ({totalPages} صفحة)</h3>
                 <p>
-                  نظام أندرويد يفتح ملفات الـ PDF في نافذة مستقلة تتيح لك التمرير
-                  الكامل بين جميع الـ {totalPages} صفحة بكل سلاسة وسرعة.
+                  يمكنك قراءة وتصفح صفحات الرواية كاملة مع التمرير السلس والطبيعي
+                  في علامة تبويب مخصصة خالية من أشرطة التحميل.
                 </p>
                 <a
                   href={externalViewUrl}
@@ -274,26 +277,26 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
                   rel="noopener noreferrer"
                   className={styles.androidPrimaryBtn}
                 >
-                  <ExternalLink size={17} />
+                  <ExternalLink size={18} />
                   <span>فتح الرواية كاملة والتمرير</span>
                 </a>
               </div>
             </div>
           ) : (
+            /* Desktop / Web: Full novel with normal continuous scrolling */
             <div className={styles.iframeClipWrapper}>
               <iframe
                 key={page}
-                src={getPageUrl(page)}
+                src={desktopPdfUrl}
                 title={`قراءة ${book.title} - صفحة ${page}`}
                 className={styles.pdfIframe}
-                scrolling="no"
                 onLoad={() => setIsLoading(false)}
               />
             </div>
           )}
 
-          {/* Stable Loading Overlay: Matches exact box size, page never jumps */}
-          {isLoading && !isAndroid && (
+          {/* Loading Overlay on Desktop */}
+          {isLoading && !isMobile && (
             <div className={styles.boxLoadingOverlay} aria-hidden="true">
               <div className={styles.loadingPill}>
                 <Loader2 size={22} className={styles.spinner} />

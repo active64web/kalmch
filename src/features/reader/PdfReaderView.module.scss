@@ -370,17 +370,16 @@
   }
 }
 
-/* Clips the native scrollbar outside the box */
+/* Wrapper for iframe on desktop */
 .iframeClipWrapper {
   position: relative;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  direction: ltr; /* Keeps iframe aligned to left and clips right edge */
+  direction: ltr;
 }
 
 .pdfIframe {
-  width: calc(100% + 24px); /* Pushes the right scrollbar 24px outside the clipped box */
+  width: 100%; /* Full width with normal native scrollbar enabled on desktop */
   height: 100%;
   border: none;
   display: block;

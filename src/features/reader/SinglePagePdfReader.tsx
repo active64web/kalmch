@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ChevronLeft,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
@@ -205,6 +206,19 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
+          {/* Direct Open in external tab for Android / mobile browsers */}
+          <a
+            href={basePdf}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.toolBtn}
+            title="فتح الكتاب في نافذة كاملة خارجية"
+            aria-label="فتح الكتاب في نافذة كاملة خارجية"
+          >
+            <ExternalLink size={15} />
+            <span className={styles.btnLabel}>فتح خارجي</span>
+          </a>
+
           {/* Fullscreen Toggle */}
           <button
             type="button"
@@ -226,6 +240,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
               src={pdfViewerUrl}
               title={`قراءة ${book.title} - صفحة ${page}`}
               className={styles.pdfIframe}
+              scrolling="no"
               onLoad={() => setIsLoading(false)}
             />
           </div>

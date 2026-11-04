@@ -184,7 +184,6 @@
   font-weight: 700;
   color: var(--secondary_color);
   padding: 0 2px;
-  appearance: textfield;
   -moz-appearance: textfield;
 
   &::-webkit-outer-spin-button,
@@ -306,19 +305,16 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  direction: ltr;
-  /* Keeps iframe aligned to left and clips right edge */
+  direction: ltr; /* Keeps iframe aligned to left and clips right edge */
 }
 
 .pdfIframe {
-  width: calc(100% + 24px);
-  /* Pushes the right scrollbar 24px outside the clipped box */
+  width: calc(100% + 24px); /* Pushes the right scrollbar 24px outside the clipped box */
   height: 100%;
   border: none;
   display: block;
   background: #ffffff;
-  pointer-events: none;
-  /* Completely disables internal mouse-wheel and touch scroll! Zero scroll inside PDF! */
+  /* pointer-events is active so Android taps on buttons/links work seamlessly */
 }
 
 /* Stable Overlay: Matches exact box size, page never jumps */
@@ -385,7 +381,6 @@
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }

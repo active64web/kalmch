@@ -245,6 +245,10 @@
 
 .fullscreenBtn {
   padding: 6px 10px;
+
+  @media (max-width: 768px) {
+    display: none !important;
+  }
 }
 
 /* 2. Single Page Stage */

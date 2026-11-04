@@ -246,15 +246,17 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             <span className={styles.btnLabel}>فتح الكتاب كاملاً</span>
           </a>
 
-          {/* Fullscreen Toggle */}
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className={`${styles.toolBtn} ${styles.fullscreenBtn}`}
-            title={isFullscreen ? "إنهاء وضع ملء الشاشة" : "وضع ملء الشاشة"}
-          >
-            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </button>
+          {/* Fullscreen Toggle - Desktop only */}
+          {!isMobile && (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className={`${styles.toolBtn} ${styles.fullscreenBtn}`}
+              title={isFullscreen ? "إنهاء وضع ملء الشاشة" : "وضع ملء الشاشة"}
+            >
+              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+          )}
         </div>
       </header>
 

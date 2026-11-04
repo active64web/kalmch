@@ -119,12 +119,14 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   }, []);
 
   const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
+  // Append toolbar=0 and navpanes=0 to hide download and print bars in supported browser viewers
+  const externalViewUrl = `${fullPdfUrl}#toolbar=0&navpanes=0`;
 
   // For Android, point to the full PDF so opening in a new tab has full 129 pages scroll
   // For iOS/Desktop, point to individual page for instant single-page presentation
   const getPageUrl = (pageNum: number) => {
     if (isAndroid) {
-      return fullPdfUrl;
+      return externalViewUrl;
     }
     if (
       book.id === "b-hatshepsut" ||
@@ -228,14 +230,14 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
-          {/* Direct Open Full Book in external tab (All 129 pages with scroll) */}
+          {/* Direct Open Full Book in external tab (All 129 pages with scroll, toolbar hidden) */}
           <a
-            href={fullPdfUrl}
+            href={externalViewUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.toolBtn}
-            title="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
-            aria-label="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
+            title="فتح الكتاب كاملاً في نافذة خارجية"
+            aria-label="فتح الكتاب كاملاً في نافذة خارجية"
           >
             <ExternalLink size={15} />
             <span className={styles.btnLabel}>فتح الكتاب كاملاً</span>
@@ -267,7 +269,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
                   الكامل بين جميع الـ {totalPages} صفحة بكل سلاسة وسرعة.
                 </p>
                 <a
-                  href={fullPdfUrl}
+                  href={externalViewUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.androidPrimaryBtn}

@@ -269,24 +269,30 @@
   }
 }
 
-/* Fixed-ratio Single Page Box: Exactly 1 page, perfectly fitted (ratio: 411 / 609 = 0.6744) */
+/* Page Box: Spacious 80% on desktop/web, untouched on mobile */
 .pageBox {
   position: relative;
-  width: 100%;
-  max-width: 530px;
-  aspect-ratio: 411 / 609;
-  max-height: 80vh;
+  width: 80%;
+  max-width: 860px;
+  height: 85vh;
+  min-height: 640px;
+  max-height: 920px;
   background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 
+  /* Mobile: left untouched, exact single-page aspect-ratio */
   @media (max-width: 768px) {
+    width: 100%;
     max-width: 420px;
+    aspect-ratio: 411 / 609;
+    height: auto;
+    min-height: 0;
     max-height: 72vh;
   }
 
-  /* Fullscreen Mode (Both Mobile and Desktop): Strictly 1 page fitted by aspect-ratio */
+  /* Fullscreen Mode (Both Mobile and Desktop) */
   .fullscreenMode & {
     width: auto !important;
     height: auto !important;

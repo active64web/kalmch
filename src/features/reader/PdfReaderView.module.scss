@@ -117,92 +117,16 @@
   }
 }
 
-/* Page Navigation Controls */
-.pageNavigator {
+.pagesCountBadge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: #ffffff;
-  border: 1px solid rgba(197, 155, 78, 0.28);
-  border-radius: 8px;
-  padding: 3px 6px;
-  box-shadow: 0 1px 4px rgba(61, 37, 12, 0.04);
-}
-
-.pageNavBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  background: #fdfbf7;
-  color: var(--secondary_color);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--main_color);
-    color: #ffffff;
-    border-color: var(--main_color);
-  }
-
-  &:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: 480px) {
-    padding: 4px 6px;
-    font-size: 11px;
-  }
-}
-
-.pageNavText {
-  @media (max-width: 480px) {
-    display: none;
-  }
-}
-
-.pageIndicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 4px;
-}
-
-.pageInput {
-  width: 40px;
-  height: 25px;
-  border-radius: 5px;
-  border: 1px solid rgba(197, 155, 78, 0.35);
-  background: #fdfbf7;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--secondary_color);
-  padding: 0 2px;
-  -moz-appearance: textfield;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  &:focus {
-    border-color: var(--main_color);
-    background: #ffffff;
-    outline: none;
-  }
-}
-
-.totalPagesLabel {
   font-size: 11.5px;
-  font-weight: 600;
-  color: rgba(61, 37, 12, 0.65);
+  font-weight: 700;
+  color: var(--therd_color);
+  background: rgba(197, 155, 78, 0.12);
+  border: 1px solid rgba(197, 155, 78, 0.3);
+  padding: 2.5px 9px;
+  border-radius: 20px;
   white-space: nowrap;
 }
 
@@ -243,15 +167,39 @@
   }
 }
 
+.externalOpenBtn {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
 .fullscreenBtn {
-  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  background: #ffffff;
+  color: var(--secondary_color);
+  border: 1px solid rgba(197, 155, 78, 0.35);
+
+  &:hover {
+    background: var(--main_color);
+    color: #ffffff;
+    border-color: var(--main_color);
+  }
 
   @media (max-width: 768px) {
     display: none !important;
   }
 }
 
-/* 2. Single Page Stage */
+.fullscreenLabel {
+  white-space: nowrap;
+}
+
+/* 2. Reader Stage */
 .singlePageStage {
   position: relative;
   width: 100%;
@@ -259,12 +207,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
+  padding: 20px;
 
   .fullscreenMode & {
-    padding: 10px 8px !important;
-    height: calc(100vh - 65px) !important;
-    max-height: calc(100vh - 65px) !important;
+    padding: 0 !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
     background: #1c1611 !important;
   }
 
@@ -273,39 +221,65 @@
   }
 }
 
-/* Page Box: Spacious 80% on desktop/web, untouched on mobile */
+/* Page Box: 100% size of its box on desktop, tablets, and large screens */
 .pageBox {
   position: relative;
-  width: 80%;
-  max-width: 860px;
-  height: 85vh;
-  min-height: 640px;
-  max-height: 920px;
+  width: 100%;
+  max-width: 100%;
+  height: 86vh;
+  min-height: 680px;
+  max-height: 940px;
   background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
   overflow: hidden;
 
-  /* Mobile: left untouched, exact single-page aspect-ratio */
+  /* Prominent Scrollbar for PDF View */
+  scrollbar-width: auto;
+  scrollbar-color: var(--main_color) #f4ecdf;
+
+  &::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f4ecdf;
+    border-radius: 8px;
+    border-left: 1px solid rgba(197, 155, 78, 0.25);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--main_color);
+    border-radius: 8px;
+    border: 2px solid #f4ecdf;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #b0873b;
+    }
+  }
+
+  /* Mobile: single-page aspect-ratio card */
   @media (max-width: 768px) {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     aspect-ratio: 411 / 609;
     height: auto;
     min-height: 0;
     max-height: 72vh;
   }
 
-  /* Fullscreen Mode (Both Mobile and Desktop) */
+  /* Fullscreen Mode (Takes 100% full screen) */
   .fullscreenMode & {
-    width: auto !important;
-    height: auto !important;
-    max-width: calc(100vw - 16px) !important;
-    max-height: calc(100vh - 80px) !important;
-    aspect-ratio: 411 / 609 !important;
-    margin: auto;
-    border-radius: 6px;
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 }
 
@@ -380,6 +354,30 @@
   width: 100%;
   height: 100%;
   direction: ltr;
+
+  scrollbar-width: auto;
+  scrollbar-color: var(--main_color) #f4ecdf;
+
+  &::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f4ecdf;
+    border-radius: 8px;
+    border-left: 1px solid rgba(197, 155, 78, 0.25);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--main_color);
+    border-radius: 8px;
+    border: 2px solid #f4ecdf;
+
+    &:hover {
+      background: #b0873b;
+    }
+  }
 }
 
 .pdfIframe {

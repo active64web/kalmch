@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   Heart,
   Maximize2,
   Minimize2,
-  ChevronRight,
-  ChevronLeft,
   Loader2,
   ExternalLink,
   BookOpen,
@@ -28,8 +26,6 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   const isFavorite = isBookSaved(book.id);
 
   const totalPages = book.pagesCount || 129;
-  const [page, setPage] = useState<number>(1);
-  const [pageInput, setPageInput] = useState<string>("1");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -57,57 +53,13 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const goToPage = useCallback(
-    (target: number) => {
-      const validPage = Math.max(1, Math.min(target, totalPages));
-      if (validPage !== page) {
-        setIsLoading(true);
-        setPage(validPage);
-        setPageInput(validPage.toString());
-      }
-    },
-    [page, totalPages]
-  );
-
-  const nextPage = () => {
-    goToPage(page + 1);
-  };
-
-  const prevPage = () => {
-    goToPage(page - 1);
-  };
-
-  const handlePageInputSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const parsed = parseInt(pageInput, 10);
-    if (!isNaN(parsed)) {
-      goToPage(parsed);
-    } else {
-      setPageInput(page.toString());
-    }
-  };
-
-  // Keyboard navigation on desktop: Left Arrow = Next page, Right Arrow = Previous page
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === "INPUT") return;
-      if (e.key === "ArrowLeft") {
-        goToPage(page + 1);
-      } else if (e.key === "ArrowRight") {
-        goToPage(page - 1);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [page, goToPage]);
-
   // Loading safety fallback so it never hangs
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 600);
     return () => clearTimeout(timer);
-  }, [page]);
+  }, []);
 
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -135,10 +87,10 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
   }, []);
 
   const fullPdfUrl = book.pdfUrl || "/hatshepsut-novel.pdf";
-  // External link with hidden toolbars
+  // External link with hidden toolbars for new tab
   const externalViewUrl = `${fullPdfUrl}#toolbar=0&navpanes=0`;
-  // On desktop: full book with normal continuous scroll (scrollbar=1) and FitH
-  const desktopPdfUrl = `${fullPdfUrl}#page=${page}&view=FitH&toolbar=0&navpanes=0&scrollbar=1`;
+  // On desktop/tablets: 100% width of box with normal continuous scroll (scrollbar=1) and FitH
+  const desktopPdfUrl = `${fullPdfUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`;
 
   return (
     <div
@@ -164,56 +116,11 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
           <div className={styles.bookMetaHeader}>
             <h1 className={styles.headerTitle}>{book.title}</h1>
             <span className={styles.headerAuthor}>— {book.author}</span>
+            <span className={styles.pagesCountBadge}>{totalPages} صفحة</span>
           </div>
         </div>
 
         <div className={styles.toolbarActions}>
-          {/* Page Navigation Controls on Desktop */}
-          {!isMobile && (
-            <div className={styles.pageNavigator} title="تقليب صفحات الكتاب">
-              <button
-                type="button"
-                onClick={prevPage}
-                disabled={page <= 1}
-                className={styles.pageNavBtn}
-                title="الصفحة السابقة"
-                aria-label="الانتقال إلى الصفحة السابقة"
-              >
-                <ChevronRight size={16} />
-                <span className={styles.pageNavText}>السابقة</span>
-              </button>
-
-              <form
-                onSubmit={handlePageInputSubmit}
-                className={styles.pageIndicator}
-              >
-                <input
-                  type="number"
-                  min={1}
-                  max={totalPages}
-                  value={pageInput}
-                  onChange={(e) => setPageInput(e.target.value)}
-                  onBlur={handlePageInputSubmit}
-                  className={styles.pageInput}
-                  aria-label="رقم الصفحة الحالية"
-                />
-                <span className={styles.totalPagesLabel}>/ {totalPages}</span>
-              </form>
-
-              <button
-                type="button"
-                onClick={nextPage}
-                disabled={page >= totalPages}
-                className={styles.pageNavBtn}
-                title="الصفحة التالية"
-                aria-label="الانتقال إلى الصفحة التالية"
-              >
-                <span className={styles.pageNavText}>التالية</span>
-                <ChevronLeft size={16} />
-              </button>
-            </div>
-          )}
-
           {/* Favorite Toggle */}
           <button
             type="button"
@@ -233,28 +140,34 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
             </span>
           </button>
 
-          {/* Direct Open in external tab */}
-          <a
-            href={externalViewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.toolBtn}
-            title="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
-            aria-label="فتح الكتاب كاملاً في نافذة خارجية مع التمرير"
-          >
-            <ExternalLink size={15} />
-            <span className={styles.btnLabel}>فتح الكتاب كاملاً</span>
-          </a>
+          {/* Direct Open in external tab - Desktop/Tablets only */}
+          {!isMobile && (
+            <a
+              href={externalViewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.toolBtn} ${styles.externalOpenBtn}`}
+              title="فتح الكتاب في نافذة خارجية مع التمرير"
+              aria-label="فتح الكتاب في نافذة خارجية مع التمرير"
+            >
+              <ExternalLink size={15} />
+              <span className={styles.btnLabel}>فتح في علامة تبويب جديدة</span>
+            </a>
+          )}
 
-          {/* Fullscreen Toggle - Desktop only */}
+          {/* Fullscreen Toggle - Desktop and tablets */}
           {!isMobile && (
             <button
               type="button"
               onClick={toggleFullscreen}
               className={`${styles.toolBtn} ${styles.fullscreenBtn}`}
-              title={isFullscreen ? "إنهاء وضع ملء الشاشة" : "وضع ملء الشاشة"}
+              title={isFullscreen ? "إنهاء ملء الشاشة" : "تكبير الشاشة"}
+              aria-label={isFullscreen ? "إنهاء ملء الشاشة" : "تكبير الشاشة"}
             >
               {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              <span className={styles.fullscreenLabel}>
+                {isFullscreen ? "إنهاء ملء الشاشة" : "تكبير الشاشة"}
+              </span>
             </button>
           )}
         </div>
@@ -271,7 +184,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
                 <h3>قراءة الرواية كاملة ({totalPages} صفحة)</h3>
                 <p>
                   يمكنك قراءة وتصفح صفحات الرواية كاملة مع التمرير السلس والطبيعي
-                  في علامة تبويب مخصصة خالية من أشرطة التحميل.
+                  في علامة تبويب مخصصة خالية من الأشرطة العلوية.
                 </p>
                 <a
                   href={externalViewUrl}
@@ -285,13 +198,13 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
               </div>
             </div>
           ) : (
-            /* Desktop / Web: Full novel with normal continuous scrolling */
+            /* Desktop & Tablets: 100% size in box with normal continuous scroll */
             <div className={styles.iframeClipWrapper}>
               <iframe
-                key={page}
                 src={desktopPdfUrl}
-                title={`قراءة ${book.title} - صفحة ${page}`}
+                title={`قراءة ${book.title}`}
                 className={styles.pdfIframe}
+                scrolling="yes"
                 onLoad={() => setIsLoading(false)}
               />
             </div>
@@ -303,7 +216,7 @@ export const SinglePagePdfReader: React.FC<SinglePagePdfReaderProps> = ({
               <div className={styles.loadingPill}>
                 <Loader2 size={22} className={styles.spinner} />
                 <span className={styles.loadingPillText}>
-                  جاري تجهيز صفحة {page}...
+                  جاري تجهيز صفحات الكتاب...
                 </span>
               </div>
             </div>

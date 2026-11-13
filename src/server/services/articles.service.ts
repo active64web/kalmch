@@ -1,5 +1,5 @@
 import { apiClient } from "../config/api-client";
-import { articlesData, type ArticleItem } from "@/data/articles.data";
+import type { ArticleItem } from "@/data/articles.data";
 import type {
   ApiArticle,
   ArticlesApiResponse,
@@ -88,12 +88,12 @@ export const articlesService = {
         : null;
 
       if (!rawArticles || rawArticles.length === 0) {
-        return articlesData.slice(0, 8);
+        return [];
       }
 
       return rawArticles.slice(0, 8).map(mapApiArticleToArticleItem);
     } catch {
-      return articlesData.slice(0, 8);
+      return [];
     }
   },
 
@@ -166,17 +166,12 @@ export const articlesService = {
         total,
       };
     } catch {
-      // Fallback: slice local articlesData
-      const filtered = articlesData;
-      const start = (page - 1) * perPage;
-      const sliced = filtered.slice(start, start + perPage);
-
       return {
-        articles: sliced,
+        articles: [],
         currentPage: page,
-        lastPage: Math.ceil(filtered.length / perPage) || 1,
-        hasMore: start + perPage < filtered.length,
-        total: filtered.length,
+        lastPage: 1,
+        hasMore: false,
+        total: 0,
       };
     }
   },
@@ -215,16 +210,9 @@ export const articlesService = {
       // Fallback below
     }
 
-    // Fallback to local articlesData
-    const local = articlesData.find(
-      (a) => String(a.id) === articleId || a.slug === articleId
-    );
-
     return {
-      article: local || null,
-      relatedArticles: articlesData
-        .filter((a) => a.id !== (local?.id || articleId))
-        .slice(0, 3),
+      article: null,
+      relatedArticles: [],
     };
   },
 

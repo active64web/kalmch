@@ -74,6 +74,8 @@ export interface PaginatedBooksResponse {
 export interface GetCategoryBooksParams {
   categoryId?: string | number;
   categorySlug?: string;
+  authorId?: string | number;
+  search?: string;
   page?: number;
   perPage?: number;
 }

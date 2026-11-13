@@ -41,3 +41,4 @@ export const settingsService = {
     return DEFAULT_SETTINGS;
   },
 };
+

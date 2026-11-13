@@ -7,10 +7,9 @@ import React, {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { booksData, BookItem } from "@/data/books.data";
+import type { BookItem } from "@/data/books.data";
 
-const STORAGE_KEY = "kalmch_library_saved";
-const INITIAL_DEFAULT_IDS = ["b-1", "b-2", "b-4"];
+const STORAGE_KEY = "kalmch_library_saved_books";
 
 interface LibraryContextType {
   savedBookIds: string[];
@@ -42,22 +41,18 @@ function notifyChange() {
 
 function getSnapshot(): string {
   if (typeof window === "undefined") {
-    return JSON.stringify(INITIAL_DEFAULT_IDS);
+    return "[]";
   }
   try {
     const item = localStorage.getItem(STORAGE_KEY);
-    if (item === null) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEFAULT_IDS));
-      return JSON.stringify(INITIAL_DEFAULT_IDS);
-    }
-    return item;
+    return item || "[]";
   } catch {
-    return JSON.stringify(INITIAL_DEFAULT_IDS);
+    return "[]";
   }
 }
 
 function getServerSnapshot(): string {
-  return JSON.stringify(INITIAL_DEFAULT_IDS);
+  return "[]";
 }
 
 export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -65,18 +60,22 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const rawSaved = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  const savedBookIds: string[] = useMemo(() => {
+  const savedBooks: BookItem[] = useMemo(() => {
     try {
       const parsed = JSON.parse(rawSaved);
-      return Array.isArray(parsed) ? parsed : INITIAL_DEFAULT_IDS;
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return INITIAL_DEFAULT_IDS;
+      return [];
     }
   }, [rawSaved]);
 
-  const persist = useCallback((ids: string[]) => {
+  const savedBookIds = useMemo(() => {
+    return savedBooks.map((b) => b.id);
+  }, [savedBooks]);
+
+  const persist = useCallback((books: BookItem[]) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
       notifyChange();
     } catch (err) {
       console.error("Failed to save to localStorage:", err);
@@ -84,40 +83,34 @@ export const LibraryProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const isBookSaved = useCallback(
-    (id: string) => savedBookIds.includes(id),
+    (id: string) => savedBookIds.includes(String(id)),
     [savedBookIds]
   );
 
   const toggleSaveBook = useCallback(
     (book: BookItem) => {
-      let updated: string[];
-      if (savedBookIds.includes(book.id)) {
-        updated = savedBookIds.filter((id) => id !== book.id);
+      let updated: BookItem[];
+      if (savedBookIds.includes(String(book.id))) {
+        updated = savedBooks.filter((b) => String(b.id) !== String(book.id));
       } else {
-        updated = [book.id, ...savedBookIds];
+        updated = [book, ...savedBooks];
       }
       persist(updated);
     },
-    [savedBookIds, persist]
+    [savedBookIds, savedBooks, persist]
   );
 
   const removeBook = useCallback(
     (id: string) => {
-      const updated = savedBookIds.filter((bookId) => bookId !== id);
+      const updated = savedBooks.filter((b) => String(b.id) !== String(id));
       persist(updated);
     },
-    [savedBookIds, persist]
+    [savedBooks, persist]
   );
 
   const clearLibrary = useCallback(() => {
     persist([]);
   }, [persist]);
-
-  const savedBooks = useMemo(() => {
-    return savedBookIds
-      .map((id) => booksData.find((b) => b.id === id))
-      .filter((b): b is BookItem => Boolean(b));
-  }, [savedBookIds]);
 
   const value = useMemo(
     () => ({

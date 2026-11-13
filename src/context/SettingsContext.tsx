@@ -26,3 +26,4 @@ export const useSettings = (): SiteSettings => {
   const context = useContext(SettingsContext);
   return context.settings || DEFAULT_SETTINGS;
 };
+

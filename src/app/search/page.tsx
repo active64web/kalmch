@@ -2,10 +2,11 @@ import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { SearchX, ArrowLeft, BookOpen } from "lucide-react";
-import { booksData } from "@/data/books.data";
+import { booksService } from "@/server/services/books.service";
 import { PageHeader } from "@/components/common/PageHeader";
 import { BookCard } from "@/components/common/BookCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
+import type { BookItem } from "@/data/books.data";
 import styles from "./SearchPage.module.scss";
 
 import { constructMetadata } from "@/utils/seo";
@@ -46,21 +47,17 @@ export async function generateMetadata({
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q } = await searchParams;
   const rawQuery = (q || "").trim();
-  const normalizedQuery = rawQuery.toLowerCase();
 
-  // Search in books by title, author, category, or description
-  const matchingBooks = rawQuery
-    ? booksData.filter((book) => {
-        const titleMatch = book.title.toLowerCase().includes(normalizedQuery);
-        const authorMatch = book.author.toLowerCase().includes(normalizedQuery);
-        const categoryMatch = book.category.toLowerCase().includes(normalizedQuery);
-        const descMatch = book.description
-          ? book.description.toLowerCase().includes(normalizedQuery)
-          : false;
-
-        return titleMatch || authorMatch || categoryMatch || descMatch;
-      })
-    : [];
+  // Search books via API using search query parameter
+  let matchingBooks: BookItem[] = [];
+  if (rawQuery) {
+    const searchResult = await booksService.getCategoryBooks({
+      search: rawQuery,
+      page: 1,
+      perPage: 30,
+    });
+    matchingBooks = searchResult.books || [];
+  }
 
   const hasQuery = rawQuery.length > 0;
   const hasResults = matchingBooks.length > 0;

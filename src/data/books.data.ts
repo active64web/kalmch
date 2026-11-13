@@ -7,6 +7,7 @@ export interface BookItem {
   category: string;
   categorySlug: string;
   coverImage?: string;
+  pagesCount?: number;
   rating?: number;
   ratingsCount?: number;
   readsCount?: number;

@@ -1,5 +1,5 @@
 import { apiClient } from "../config/api-client";
-import { booksData, type BookItem } from "@/data/books.data";
+import type { BookItem } from "@/data/books.data";
 import type {
   ApiBook,
   BooksApiResponse,
@@ -68,12 +68,12 @@ export const booksService = {
         : null;
 
       if (!rawBooks || rawBooks.length === 0) {
-        return booksData.slice(0, 10);
+        return [];
       }
 
       return rawBooks.slice(0, 10).map(mapApiBookToBookItem);
     } catch {
-      return booksData.slice(0, 10);
+      return [];
     }
   },
 
@@ -151,21 +151,12 @@ export const booksService = {
         total,
       };
     } catch {
-      // Fallback: slice local booksData
-      const filtered = booksData.filter(
-        (b) =>
-          (!params.categorySlug || b.categorySlug === params.categorySlug) ||
-          (!params.categoryId || b.id === String(params.categoryId))
-      );
-      const start = (page - 1) * perPage;
-      const sliced = filtered.slice(start, start + perPage);
-
       return {
-        books: sliced,
+        books: [],
         currentPage: page,
-        lastPage: Math.ceil(filtered.length / perPage) || 1,
-        hasMore: start + perPage < filtered.length,
-        total: filtered.length,
+        lastPage: 1,
+        hasMore: false,
+        total: 0,
       };
     }
   },
@@ -204,13 +195,8 @@ export const booksService = {
       // Fallback below
     }
 
-    // Fallback to local booksData filtered by id (or slug for safety)
-    const local = booksData.find(
-      (b) => String(b.id) === bookId || b.slug === bookId
-    );
-
     return {
-      book: local || null,
+      book: null,
       relatedBooks: [],
     };
   },

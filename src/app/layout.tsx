@@ -7,6 +7,8 @@ import { ScrollToTop } from "@/components/common/ScrollToTop";
 import { VisitorTracker } from "@/components/common/VisitorTracker";
 import { LibraryProvider } from "@/context/LibraryContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { SettingsProvider } from "@/context/SettingsContext";
+import { settingsService } from "@/server/services/settings.service";
 import { BASE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "@/utils/seo";
 import "@/styles/global.scss";
 
@@ -82,23 +84,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await settingsService.getSettings();
+
   return (
     <html lang="ar" dir="rtl" className={almarai.variable}>
       <body className={almarai.className}>
         <AuthProvider>
-          <LibraryProvider>
-            <VisitorTracker />
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            <ScrollToTop />
-            <BottomNav />
-          </LibraryProvider>
+          <SettingsProvider initialSettings={settings}>
+            <LibraryProvider>
+              <VisitorTracker />
+              <Header />
+              <main>{children}</main>
+              <Footer />
+              <ScrollToTop />
+              <BottomNav />
+            </LibraryProvider>
+          </SettingsProvider>
         </AuthProvider>
       </body>
     </html>

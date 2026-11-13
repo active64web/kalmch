@@ -93,6 +93,9 @@ export const booksService = {
     if (params.categorySlug) {
       query.set("category", params.categorySlug);
     }
+    if (params.search) {
+      query.set("search", params.search);
+    }
     query.set("page", String(page));
     query.set("per_page", String(perPage));
 

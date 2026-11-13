@@ -8,17 +8,23 @@ import {
   User,
   MessageSquare,
   CheckCircle2,
+  MapPin,
 } from "lucide-react";
 import {
   FacebookIcon,
   InstagramIcon,
-  LinkedInIcon,
   WhatsAppIcon,
   XIcon,
+  YouTubeIcon,
+  TelegramIcon,
+  TikTokIcon,
 } from "@/components/common/SocialIcons";
+import { useSettings } from "@/context/SettingsContext";
 import styles from "./ContactContainer.module.scss";
 
 export const ContactContainer: React.FC = () => {
+  const settings = useSettings();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -54,6 +60,8 @@ export const ContactContainer: React.FC = () => {
     }, 700);
   };
 
+  const cleanWhatsapp = (settings.whatsapp || "").replace(/[^\d]/g, "");
+
   return (
     <div className={styles.contactGrid}>
       {/* 1. Contact Information Column */}
@@ -68,93 +76,149 @@ export const ContactContainer: React.FC = () => {
           </p>
         </div>
 
-        {/* Channels List */}
+        {/* Channels List from API Settings */}
         <div className={styles.channelsList}>
           {/* Phone */}
-          <a href="tel:+201200000000" className={styles.channelItem}>
-            <div className={styles.channelIconCircle}>
-              <Phone size={20} />
-            </div>
-            <div className={styles.channelDetails}>
-              <span className={styles.channelLabel}>رقم الهاتف المباشر</span>
-              <span className={styles.channelValue} dir="ltr">
-                +20 120 000 0000
-              </span>
-            </div>
-          </a>
+          {settings.phone && (
+            <a href={`tel:${settings.phone}`} className={styles.channelItem}>
+              <div className={styles.channelIconCircle}>
+                <Phone size={20} />
+              </div>
+              <div className={styles.channelDetails}>
+                <span className={styles.channelLabel}>رقم الهاتف المباشر</span>
+                <span className={styles.channelValue} dir="ltr">
+                  {settings.phone}
+                </span>
+              </div>
+            </a>
+          )}
 
           {/* WhatsApp */}
-          <a
-            href="https://wa.me/201200000000"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.channelItem}
-          >
-            <div className={`${styles.channelIconCircle} ${styles.whatsappIcon}`}>
-              <WhatsAppIcon size={20} color="#25D366" />
-            </div>
-            <div className={styles.channelDetails}>
-              <span className={styles.channelLabel}>محادثة واتساب سريعة</span>
-              <span className={styles.channelValue} dir="ltr">
-                +20 120 000 0000
-              </span>
-            </div>
-          </a>
+          {settings.whatsapp && (
+            <a
+              href={`https://wa.me/${cleanWhatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.channelItem}
+            >
+              <div className={`${styles.channelIconCircle} ${styles.whatsappIcon}`}>
+                <WhatsAppIcon size={20} color="#25D366" />
+              </div>
+              <div className={styles.channelDetails}>
+                <span className={styles.channelLabel}>محادثة واتساب سريعة</span>
+                <span className={styles.channelValue} dir="ltr">
+                  {settings.whatsapp}
+                </span>
+              </div>
+            </a>
+          )}
 
           {/* Email */}
-          <a href="mailto:info@kalmch.com" className={styles.channelItem}>
-            <div className={styles.channelIconCircle}>
-              <Mail size={20} />
+          {settings.email && (
+            <a href={`mailto:${settings.email}`} className={styles.channelItem}>
+              <div className={styles.channelIconCircle}>
+                <Mail size={20} />
+              </div>
+              <div className={styles.channelDetails}>
+                <span className={styles.channelLabel}>البريد الإلكتروني</span>
+                <span className={styles.channelValue} dir="ltr">
+                  {settings.email}
+                </span>
+              </div>
+            </a>
+          )}
+
+          {/* Address */}
+          {settings.address && (
+            <div className={styles.channelItem}>
+              <div className={styles.channelIconCircle}>
+                <MapPin size={20} />
+              </div>
+              <div className={styles.channelDetails}>
+                <span className={styles.channelLabel}>المقر والعنوان</span>
+                <span className={styles.channelValue}>
+                  {settings.address}
+                </span>
+              </div>
             </div>
-            <div className={styles.channelDetails}>
-              <span className={styles.channelLabel}>البريد الإلكتروني</span>
-              <span className={styles.channelValue} dir="ltr">
-                info@kalmch.com
-              </span>
-            </div>
-          </a>
+          )}
         </div>
 
-        {/* Social Media Row */}
+        {/* Social Media Row from Settings */}
         <div className={styles.socialSection}>
           <span className={styles.socialTitle}>تابعنا على منصات التواصل</span>
           <div className={styles.socialRow} aria-label="حسابات التواصل الاجتماعي">
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialBtn}
-              aria-label="فيسبوك"
-            >
-              <FacebookIcon size={19} />
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialBtn}
-              aria-label="إنستغرام"
-            >
-              <InstagramIcon size={19} />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialBtn}
-              aria-label="لينكد إن"
-            >
-              <LinkedInIcon size={19} />
-            </a>
-            <a
-              href="https://x.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.socialBtn}
-              aria-label="إكس"
-            >
-              <XIcon size={18} />
-            </a>
+            {settings.facebook && (
+              <a
+                href={settings.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="فيسبوك"
+              >
+                <FacebookIcon size={19} />
+              </a>
+            )}
+
+            {settings.instagram && (
+              <a
+                href={settings.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="إنستغرام"
+              >
+                <InstagramIcon size={19} />
+              </a>
+            )}
+
+            {settings.youtube && (
+              <a
+                href={settings.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="يوتيوب"
+              >
+                <YouTubeIcon size={19} />
+              </a>
+            )}
+
+            {settings.twitter && (
+              <a
+                href={settings.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="إكس"
+              >
+                <XIcon size={18} />
+              </a>
+            )}
+
+            {settings.telegram && (
+              <a
+                href={settings.telegram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="تيليجرام"
+              >
+                <TelegramIcon size={19} />
+              </a>
+            )}
+
+            {settings.tiktok && (
+              <a
+                href={settings.tiktok}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.socialBtn}
+                aria-label="تيك توك"
+              >
+                <TikTokIcon size={19} />
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -168,121 +232,118 @@ export const ContactContainer: React.FC = () => {
           </p>
         </div>
 
-        {errorMessage && (
-          <div className={styles.alertError} role="alert">
-            {errorMessage}
-          </div>
-        )}
-
         {isSuccess ? (
-          <div className={styles.successState}>
-            <div className={styles.successIconCircle}>
-              <CheckCircle2 size={42} />
-            </div>
-            <h3 className={styles.successTitle}>شكراً لتواصلك معنا!</h3>
+          <div className={styles.successBox}>
+            <CheckCircle2 size={48} className={styles.successIcon} />
+            <h3 className={styles.successTitle}>تم استلام رسالتك بنجاح!</h3>
             <p className={styles.successText}>
-              تم استلام رسالتك بنجاح، وسنتواصل معك عبر البريد الإلكتروني في غضون
-              ساعات عمل قليلة.
+              نشكرك على تواصلك معنا، سيتولى أحد مسؤولي المنصة مراجعة رسالتك
+              والتواصل معك عبر البريد الإلكتروني.
             </p>
             <button
               type="button"
               onClick={() => setIsSuccess(false)}
-              className={styles.sendAnotherBtn}
+              className={styles.resetBtn}
             >
               إرسال رسالة أخرى
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {/* Name Field */}
+          <form onSubmit={handleSubmit} className={styles.formElement}>
+            {errorMessage && (
+              <div className={styles.errorAlert}>{errorMessage}</div>
+            )}
+
             <div className={styles.inputGroup}>
               <label htmlFor="name" className={styles.inputLabel}>
-                الاسم بالكامل
+                الاسم الكامل <span className={styles.required}>*</span>
               </label>
               <div className={styles.inputWrapper}>
-                <User size={18} className={styles.inputIcon} />
+                <User size={18} className={styles.fieldIcon} />
                 <input
+                  type="text"
                   id="name"
                   name="name"
-                  type="text"
-                  required
-                  placeholder="مثال: بيشوي ميخائيل"
                   value={formData.name}
                   onChange={handleChange}
+                  placeholder="مثال: بيشوي سمير"
                   className={styles.textInput}
+                  required
                 />
               </div>
             </div>
 
-            {/* Email Field */}
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.inputLabel}>
-                البريد الإلكتروني
+                البريد الإلكتروني <span className={styles.required}>*</span>
               </label>
               <div className={styles.inputWrapper}>
-                <Mail size={18} className={styles.inputIcon} />
+                <Mail size={18} className={styles.fieldIcon} />
                 <input
+                  type="email"
                   id="email"
                   name="email"
-                  type="email"
-                  required
-                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
+                  placeholder="name@example.com"
                   className={styles.textInput}
                   dir="ltr"
+                  required
                 />
               </div>
             </div>
 
-            {/* Phone Field */}
             <div className={styles.inputGroup}>
               <label htmlFor="phone" className={styles.inputLabel}>
                 رقم الهاتف (اختياري)
               </label>
               <div className={styles.inputWrapper}>
-                <Phone size={18} className={styles.inputIcon} />
+                <Phone size={18} className={styles.fieldIcon} />
                 <input
+                  type="tel"
                   id="phone"
                   name="phone"
-                  type="tel"
-                  placeholder="01234567890"
                   value={formData.phone}
                   onChange={handleChange}
+                  placeholder="+20 120 000 0000"
                   className={styles.textInput}
                   dir="ltr"
                 />
               </div>
             </div>
 
-            {/* Message Field */}
             <div className={styles.inputGroup}>
               <label htmlFor="message" className={styles.inputLabel}>
-                الرسالة
+                نص الرسالة أو الاستفسار <span className={styles.required}>*</span>
               </label>
-              <div className={styles.textareaWrapper}>
-                <MessageSquare size={18} className={styles.textareaIcon} />
+              <div className={`${styles.inputWrapper} ${styles.textareaWrapper}`}>
+                <MessageSquare size={18} className={styles.fieldIconTextarea} />
                 <textarea
                   id="message"
                   name="message"
-                  required
-                  rows={4}
-                  placeholder="اكتب رسالتك أو استفسارك هنا..."
                   value={formData.message}
                   onChange={handleChange}
+                  placeholder="اكتب استفسارك، مقترحك، أو تفاصيل المخطوطة/الكتاب الذي ترغب في نشره..."
+                  rows={5}
                   className={styles.textareaInput}
+                  required
                 />
               </div>
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
               className={styles.submitBtn}
             >
-              <Send size={18} />
-              <span>{isLoading ? "جاري الإرسال..." : "إرسال الرسالة"}</span>
+              {isLoading ? (
+                <span>جاري إرسال الرسالة...</span>
+              ) : (
+                <>
+                  <span>إرسال الرسالة الآن</span>
+                  <Send size={16} className={styles.sendIcon} />
+                </>
+              )}
             </button>
           </form>
         )}
@@ -290,4 +351,3 @@ export const ContactContainer: React.FC = () => {
     </div>
   );
 };
-

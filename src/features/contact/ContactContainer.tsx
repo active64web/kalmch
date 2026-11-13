@@ -9,6 +9,7 @@ import {
   MessageSquare,
   CheckCircle2,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import {
   FacebookIcon,
@@ -20,6 +21,7 @@ import {
   TikTokIcon,
 } from "@/components/common/SocialIcons";
 import { useSettings } from "@/context/SettingsContext";
+import { sendContactMessageAction } from "@/server/actions/contact.actions";
 import styles from "./ContactContainer.module.scss";
 
 export const ContactContainer: React.FC = () => {
@@ -42,22 +44,35 @@ export const ContactContainer: React.FC = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      setErrorMessage("يرجى ملء الحقول الأساسية (الاسم، البريد، الرسالة)");
+      setErrorMessage("يرجى ملء جميع الحقول الإلزامية (الاسم، البريد الإلكتروني، والرسالة)");
       return;
     }
 
     setIsLoading(true);
-    // Simulate sending message
-    setTimeout(() => {
+    try {
+      const result = await sendContactMessageAction({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+      });
+
+      if (result.success) {
+        setIsSuccess(true);
+        setFormData({ name: "", email: "", phone: "", message: "" });
+      } else {
+        setErrorMessage(result.message);
+      }
+    } catch {
+      setErrorMessage("حدث خطأ أثناء إرسال الرسالة، يرجى المحاولة مرة أخرى.");
+    } finally {
       setIsLoading(false);
-      setIsSuccess(true);
-      setFormData({ name: "", email: "", phone: "", message: "" });
-    }, 700);
+    }
   };
 
   const cleanWhatsapp = (settings.whatsapp || "").replace(/[^\d]/g, "");
@@ -234,11 +249,11 @@ export const ContactContainer: React.FC = () => {
 
         {isSuccess ? (
           <div className={styles.successBox}>
-            <CheckCircle2 size={48} className={styles.successIcon} />
+            <CheckCircle2 size={52} className={styles.successIcon} />
             <h3 className={styles.successTitle}>تم استلام رسالتك بنجاح!</h3>
             <p className={styles.successText}>
               نشكرك على تواصلك معنا، سيتولى أحد مسؤولي المنصة مراجعة رسالتك
-              والتواصل معك عبر البريد الإلكتروني.
+              والتواصل معك عبر البريد الإلكتروني في أقرب وقت.
             </p>
             <button
               type="button"
@@ -256,10 +271,11 @@ export const ContactContainer: React.FC = () => {
 
             <div className={styles.inputGroup}>
               <label htmlFor="name" className={styles.inputLabel}>
-                الاسم الكامل <span className={styles.required}>*</span>
+                <span>الاسم الكامل</span>
+                <span className={styles.required}>*</span>
               </label>
               <div className={styles.inputWrapper}>
-                <User size={18} className={styles.fieldIcon} />
+                <User size={18} className={styles.fieldIcon} aria-hidden="true" />
                 <input
                   type="text"
                   id="name"
@@ -275,10 +291,11 @@ export const ContactContainer: React.FC = () => {
 
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.inputLabel}>
-                البريد الإلكتروني <span className={styles.required}>*</span>
+                <span>البريد الإلكتروني</span>
+                <span className={styles.required}>*</span>
               </label>
               <div className={styles.inputWrapper}>
-                <Mail size={18} className={styles.fieldIcon} />
+                <Mail size={18} className={styles.fieldIcon} aria-hidden="true" />
                 <input
                   type="email"
                   id="email"
@@ -287,7 +304,6 @@ export const ContactContainer: React.FC = () => {
                   onChange={handleChange}
                   placeholder="name@example.com"
                   className={styles.textInput}
-                  dir="ltr"
                   required
                 />
               </div>
@@ -295,29 +311,29 @@ export const ContactContainer: React.FC = () => {
 
             <div className={styles.inputGroup}>
               <label htmlFor="phone" className={styles.inputLabel}>
-                رقم الهاتف (اختياري)
+                <span>رقم الهاتف (اختياري)</span>
               </label>
               <div className={styles.inputWrapper}>
-                <Phone size={18} className={styles.fieldIcon} />
+                <Phone size={18} className={styles.fieldIcon} aria-hidden="true" />
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="+20 120 000 0000"
+                  placeholder="01012345678"
                   className={styles.textInput}
-                  dir="ltr"
                 />
               </div>
             </div>
 
             <div className={styles.inputGroup}>
               <label htmlFor="message" className={styles.inputLabel}>
-                نص الرسالة أو الاستفسار <span className={styles.required}>*</span>
+                <span>نص الرسالة أو الاستفسار</span>
+                <span className={styles.required}>*</span>
               </label>
-              <div className={`${styles.inputWrapper} ${styles.textareaWrapper}`}>
-                <MessageSquare size={18} className={styles.fieldIconTextarea} />
+              <div className={styles.textareaWrapper}>
+                <MessageSquare size={18} className={styles.fieldIconTextarea} aria-hidden="true" />
                 <textarea
                   id="message"
                   name="message"
@@ -337,7 +353,10 @@ export const ContactContainer: React.FC = () => {
               className={styles.submitBtn}
             >
               {isLoading ? (
-                <span>جاري إرسال الرسالة...</span>
+                <>
+                  <Loader2 size={18} className={styles.spinner} />
+                  <span>جاري إرسال الرسالة...</span>
+                </>
               ) : (
                 <>
                   <span>إرسال الرسالة الآن</span>

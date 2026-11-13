@@ -11,6 +11,11 @@ import {
   KeyRound,
   RotateCcw,
 } from "lucide-react";
+import {
+  forgotPasswordAction,
+  verifyResetCodeAction,
+  resetPasswordAction,
+} from "@/server/actions/auth.actions";
 import styles from "./AuthContainer.module.scss";
 
 interface ForgotPasswordFlowProps {
@@ -19,12 +24,15 @@ interface ForgotPasswordFlowProps {
 
 type ForgotStage = "email" | "otp" | "reset" | "success";
 
+const OTP_LENGTH = 6;
+
 export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
   onBackToLogin,
 }) => {
   const [stage, setStage] = useState<ForgotStage>("email");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -54,32 +62,71 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
   }, [stage, countdown]);
 
   // Stage 1: Send OTP
-  const handleSendEmail = (e: React.FormEvent) => {
+  const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
     if (!email.trim() || !email.includes("@")) {
       setErrorMsg("يرجى إدخال بريد إلكتروني صحيح");
       return;
     }
+
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStage("otp");
-      setCountdown(59);
-      setIsResendActive(false);
-    }, 600);
+    const result = await forgotPasswordAction({ email: email.trim() });
+    setIsLoading(false);
+
+    if (!result.success) {
+      setErrorMsg(result.error || "تعذر إرسال رمز التحقق");
+      return;
+    }
+
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setStage("otp");
+    setCountdown(59);
+    setIsResendActive(false);
   };
 
   // Stage 2: OTP input handlers
   const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
+    const cleanDigits = value.replace(/\D/g, "");
+    if (!cleanDigits && value !== "") return;
+
+    if (cleanDigits.length > 1) {
+      const newOtp = [...otp];
+      const chars = cleanDigits.slice(0, OTP_LENGTH - index).split("");
+      chars.forEach((char, offset) => {
+        newOtp[index + offset] = char;
+      });
+      setOtp(newOtp);
+      const nextFocusIndex = Math.min(index + chars.length, OTP_LENGTH - 1);
+      otpInputsRef.current[nextFocusIndex]?.focus();
+      return;
+    }
+
     const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
+    newOtp[index] = cleanDigits;
     setOtp(newOtp);
 
-    if (value && index < 3) {
+    if (cleanDigits && index < OTP_LENGTH - 1) {
       otpInputsRef.current[index + 1]?.focus();
     }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedDigits = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH);
+    if (!pastedDigits) return;
+
+    const newOtp = Array(OTP_LENGTH).fill("");
+    pastedDigits.split("").forEach((char, idx) => {
+      newOtp[idx] = char;
+    });
+    setOtp(newOtp);
+
+    const focusIdx = Math.min(pastedDigits.length, OTP_LENGTH - 1);
+    otpInputsRef.current[focusIdx]?.focus();
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
@@ -88,32 +135,51 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
     }
   };
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
     const enteredCode = otp.join("");
-    if (enteredCode.length < 4) {
-      setErrorMsg("يرجى إدخال رمز التحقق كاملاً المكون من 4 أرقام");
+    if (enteredCode.length < OTP_LENGTH) {
+      setErrorMsg(`يرجى إدخال رمز التحقق كاملاً المكون من ${OTP_LENGTH} أرقام`);
       return;
     }
+
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStage("reset");
-    }, 600);
+    const result = await verifyResetCodeAction({
+      email: email.trim(),
+      code: enteredCode,
+    });
+    setIsLoading(false);
+
+    if (!result.success || !result.reset_token) {
+      setErrorMsg(result.error || "رمز التحقق غير صحيح أو منتهي الصلاحية");
+      return;
+    }
+
+    setResetToken(result.reset_token);
+    setStage("reset");
   };
 
-  const handleResendCode = () => {
-    if (!isResendActive) return;
+  const handleResendCode = async () => {
+    if (!isResendActive || isLoading) return;
+    setErrorMsg("");
+    setIsLoading(true);
+    const result = await forgotPasswordAction({ email: email.trim() });
+    setIsLoading(false);
+
+    if (!result.success) {
+      setErrorMsg(result.error || "تعذر إعادة إرسال رمز التحقق");
+      return;
+    }
+
     setIsResendActive(false);
     setCountdown(59);
-    setOtp(["", "", "", ""]);
-    setErrorMsg("");
+    setOtp(Array(OTP_LENGTH).fill(""));
     otpInputsRef.current[0]?.focus();
   };
 
   // Stage 3: Reset Password
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
     if (newPassword.length < 8) {
@@ -124,11 +190,22 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
       setErrorMsg("كلمتا المرور غير متطابقتين");
       return;
     }
+
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setStage("success");
-    }, 600);
+    const result = await resetPasswordAction({
+      email: email.trim(),
+      reset_token: resetToken,
+      password: newPassword,
+      password_confirmation: confirmPassword,
+    });
+    setIsLoading(false);
+
+    if (!result.success) {
+      setErrorMsg(result.error || "فشل إعادة تعيين كلمة المرور");
+      return;
+    }
+
+    setStage("success");
   };
 
   return (
@@ -138,6 +215,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
         <button
           type="button"
           onClick={() => {
+            setErrorMsg("");
             if (stage === "otp") setStage("email");
             else if (stage === "reset") setStage("otp");
             else onBackToLogin();
@@ -238,7 +316,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
             </div>
             <h2 className={styles.formTitle}>رمز التحقق</h2>
             <p className={styles.formSubtitle}>
-              أرسلنا رمز تحقق مكوّن من 4 أرقام إلى بريدك:
+              أرسلنا رمز تحقق مكوّن من {OTP_LENGTH} أرقام إلى بريدك:
               <br />
               <strong className={styles.highlightEmail}>{email}</strong>
             </p>
@@ -255,10 +333,11 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
                 }}
                 type="text"
                 inputMode="numeric"
-                maxLength={1}
+                autoComplete={idx === 0 ? "one-time-code" : "off"}
                 value={digit}
                 onChange={(e) => handleOtpChange(idx, e.target.value)}
                 onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                onPaste={handleOtpPaste}
                 className={styles.otpBox}
                 autoFocus={idx === 0}
               />
@@ -270,6 +349,7 @@ export const ForgotPasswordFlow: React.FC<ForgotPasswordFlowProps> = ({
               <button
                 type="button"
                 onClick={handleResendCode}
+                disabled={isLoading}
                 className={styles.resendBtn}
               >
                 <RotateCcw size={15} />

@@ -2,13 +2,15 @@ import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ScrollText, Feather, Calendar, Clock, Eye, ArrowLeft } from "lucide-react";
-import { articlesData } from "@/data/articles.data";
+import { ScrollText, Feather, Calendar, Eye, ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ArticleCard } from "@/components/common/ArticleCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
+import { articlesService } from "@/server/services/articles.service";
 import { ArticleShareBtn } from "./ArticleShareBtn";
+import { ArticleCover } from "./ArticleCover";
+import { ArticleReadTracker } from "./ArticleReadTracker";
 import styles from "./ArticleDetails.module.scss";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +28,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
 
-  const article = articlesData.find(
-    (a) => a.slug === decodedSlug || a.id === decodedSlug
-  );
+  const { article } = await articlesService.getArticleById(decodedSlug);
 
   if (!article) {
     return constructMetadata({
@@ -41,7 +41,7 @@ export async function generateMetadata({
   return constructMetadata({
     title: `${article.title} - ${article.author} | قَلَم`,
     description: article.excerpt,
-    path: `/articles/${article.slug}`,
+    path: `/articles/${article.id}`,
     image: article.coverImage,
     type: "article",
     keywords: [
@@ -59,22 +59,29 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
 
-  const article = articlesData.find(
-    (a) => a.slug === decodedSlug || a.id === decodedSlug
+  const { article, relatedArticles } = await articlesService.getArticleById(
+    decodedSlug
   );
 
   if (!article) {
     notFound();
   }
 
-  const reads = article.readsCount || 1200;
-  const moreArticles = articlesData
-    .filter((a) => a.id !== article.id)
-    .slice(0, 3);
+  const reads = Number(article.readsCount ?? article.viewsCount ?? 0);
+  const typeName = article.type || "مقال";
+
+  const paragraphs = Array.isArray(article.content) && article.content.length > 0
+    ? article.content
+    : article.shortDescription
+    ? [article.shortDescription]
+    : [article.excerpt];
 
   return (
     <div className="page-main-wrapper">
-      {/* 1. Page Header */}
+      {/* 1. View Tracker (Records view once without inflating on page refresh) */}
+      <ArticleReadTracker articleId={article.id} />
+
+      {/* 2. Page Header */}
       <PageHeader
         badge="تفاصيل المقال"
         title={article.title}
@@ -85,34 +92,32 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         ]}
       />
 
-      {/* 2. Article Details Main Section */}
+      {/* 3. Article Details Main Section */}
       <section className={styles.articleSection} aria-label={`مقال ${article.title}`}>
         <div className="container">
           <div className={styles.articleCard}>
-            {/* Cover Box (Matching the default book card / book details placeholder style) */}
-            <div className={styles.coverBox}>
-              <div className={styles.placeholderIconBox} aria-hidden="true">
-                <ScrollText size={38} className={styles.coverIcon} />
-              </div>
-            </div>
+            {/* Cover Box with fallback */}
+            <ArticleCover
+              coverImage={article.coverImage}
+              title={article.title}
+            />
 
-            {/* Header Meta */}
+            {/* Header Meta (Reading time removed as requested) */}
             <div className={styles.articleHeader}>
               <div className={styles.categoryAndDate}>
-                <div className={styles.articleTypeBadge} title="مقال فكري ودراسة كنسية">
+                <div className={styles.articleTypeBadge} title={`تصنيف المحتوى: ${typeName}`}>
                   <ScrollText size={13} className={styles.badgeIcon} />
-                  <span>مقال</span>
-                </div>
-                <div className={styles.readingTime}>
-                  <Clock size={14} className={styles.metaIcon} />
-                  <span>{article.readingTime}</span>
+                  <span>{typeName}</span>
                 </div>
               </div>
 
               <h1 className={styles.articleTitle}>{article.title}</h1>
 
-              {article.excerpt && (
-                <p className={styles.articleExcerpt}>{article.excerpt}</p>
+              {/* Short description from the card (displayed in full here if truncated outside) */}
+              {(article.shortDescription || article.excerpt) && (
+                <p className={styles.articleShortDesc}>
+                  {article.shortDescription || article.excerpt}
+                </p>
               )}
 
               <div className={styles.metaBar}>
@@ -130,27 +135,29 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
                     <span>{reads.toLocaleString("en-US")} قراءة</span>
                   </div>
 
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      fontSize: "12px",
-                      color: "rgba(61, 37, 12, 0.6)",
-                    }}
-                  >
-                    <Calendar size={13} color="var(--main_color)" />
-                    {article.publishedAt}
-                  </span>
+                  {article.publishedAt && (
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        fontSize: "12px",
+                        color: "rgba(61, 37, 12, 0.6)",
+                      }}
+                    >
+                      <Calendar size={13} color="var(--main_color)" />
+                      {article.publishedAt}
+                    </span>
+                  )}
 
                   <ArticleShareBtn title={article.title} author={article.author} />
                 </div>
               </div>
             </div>
 
-            {/* Article Body Content (Clean, dignified, readable) */}
+            {/* Article Body Content */}
             <div className={styles.articleBody}>
-              {article.content.map((paragraph, idx) => (
+              {paragraphs.map((paragraph, idx) => (
                 <p key={idx}>{paragraph}</p>
               ))}
 
@@ -163,8 +170,8 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
             </div>
           </div>
 
-          {/* 3. More Articles Suggestions */}
-          {moreArticles.length > 0 && (
+          {/* 4. Related Articles Suggestions */}
+          {relatedArticles.length > 0 && (
             <div className={styles.moreSection}>
               <div className={styles.moreHeader}>
                 <h3 className={styles.moreTitle}>مقالات ذات صلة</h3>
@@ -179,7 +186,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
               </div>
 
               <div className={styles.articlesGrid}>
-                {moreArticles.map((item) => (
+                {relatedArticles.map((item) => (
                   <ArticleCard key={item.id} article={item} />
                 ))}
               </div>
@@ -188,7 +195,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
         </div>
       </section>
 
-      {/* 4. Global CTA */}
+      {/* 5. Global CTA */}
       <GlobalCTA
         badge="أقلام وفكر"
         title="استكشف المزيد من الكنوز والكتب الروحية"
@@ -205,4 +212,3 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { booksData } from "@/data/books.data";
+import { booksService } from "@/server/services/books.service";
 import { PageHeader } from "@/components/common/PageHeader";
 import { BookDetailsContainer } from "@/features/book-details";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
@@ -20,15 +20,9 @@ interface BookPageProps {
 export async function generateMetadata({
   params,
 }: BookPageProps): Promise<Metadata> {
-  const { categorySlug, bookSlug } = await params;
-  const decodedBookSlug = decodeURIComponent(bookSlug);
-  const decodedCategorySlug = decodeURIComponent(categorySlug);
-
-  const book = booksData.find(
-    (b) =>
-      (b.slug === decodedBookSlug || b.id === decodedBookSlug) &&
-      (b.categorySlug === decodedCategorySlug || !decodedCategorySlug)
-  );
+  const { bookSlug } = await params;
+  const decodedBookId = decodeURIComponent(bookSlug);
+  const { book } = await booksService.getBookById(decodedBookId);
 
   if (!book) {
     return constructMetadata({
@@ -45,7 +39,7 @@ export async function generateMetadata({
   return constructMetadata({
     title: `كتاب ${book.title} - ${book.author} | قَلَم`,
     description: desc,
-    path: `/categories/${book.categorySlug}/${book.slug}`,
+    path: `/categories/${encodeURIComponent(book.categorySlug)}/${encodeURIComponent(book.id)}`,
     image: book.coverImage,
     type: "article",
     keywords: [
@@ -61,15 +55,9 @@ export async function generateMetadata({
 }
 
 export default async function BookDetailPage({ params }: BookPageProps) {
-  const { categorySlug, bookSlug } = await params;
-  const decodedBookSlug = decodeURIComponent(bookSlug);
-  const decodedCategorySlug = decodeURIComponent(categorySlug);
-
-  const book = booksData.find(
-    (b) =>
-      (b.slug === decodedBookSlug || b.id === decodedBookSlug) &&
-      (b.categorySlug === decodedCategorySlug || !decodedCategorySlug)
-  );
+  const { bookSlug } = await params;
+  const decodedBookId = decodeURIComponent(bookSlug);
+  const { book, relatedBooks } = await booksService.getBookById(decodedBookId);
 
   if (!book) {
     notFound();
@@ -94,7 +82,7 @@ export default async function BookDetailPage({ params }: BookPageProps) {
       {/* 2. Main Details Card */}
       <section aria-label={`تفاصيل كتاب ${book.title}`}>
         <div className="container">
-          <BookDetailsContainer book={book} />
+          <BookDetailsContainer book={book} relatedBooks={relatedBooks} />
         </div>
       </section>
 

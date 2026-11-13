@@ -23,21 +23,14 @@
       border-bottom-color: var(--main_color);
       box-shadow: 0 10px 24px rgba(197, 155, 78, 0.12), inset 0 1px 0 #ffffff;
 
+      .hasPoster .coverPoster {
+        transform: scale(1.05);
+      }
+
       .placeholderIconBox {
         background: var(--main_color);
         color: #ffffff;
         transform: scale(1.05);
-      }
-
-      .readLink {
-        background: var(--secondary_color);
-        color: #ffffff;
-        border-color: var(--secondary_color);
-
-        .arrowIcon {
-          color: #ffffff;
-          transform: translateX(-4px);
-        }
       }
     }
   }
@@ -75,6 +68,19 @@
     aspect-ratio: 16 / 8;
     margin-bottom: 12px;
   }
+
+  &.hasPoster {
+    border: 1px solid rgba(197, 155, 78, 0.32);
+
+    .coverPoster {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+  }
 }
 
 .placeholderIconBox {
@@ -100,12 +106,11 @@
   }
 }
 
-/* 2. Meta Row: Fixed Article Icon & Reading Time */
+/* 2. Meta Row: Dynamic Article Type Badge */
 .cardMeta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
   margin-bottom: 10px;
 }
 
@@ -122,19 +127,6 @@
   border: 1px solid rgba(197, 155, 78, 0.25);
 
   .badgeIcon {
-    color: var(--main_color);
-  }
-}
-
-.readingTime {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(61, 37, 12, 0.6);
-
-  .metaIcon {
     color: var(--main_color);
   }
 }
@@ -187,8 +179,7 @@
 /* 4. Footer Area */
 .cardFooter {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
   margin-top: auto;
   padding-top: 12px;
   border-top: 1px dashed rgba(197, 155, 78, 0.22);
@@ -199,6 +190,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
 }
 
 .authorRow {
@@ -237,43 +229,5 @@
 
   .readsIcon {
     color: var(--main_color);
-  }
-}
-
-.readLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 8.5px 14px;
-  border-radius: 10px;
-  background: #faf7f2;
-  color: var(--secondary_color);
-  font-size: 12.5px;
-  font-weight: 700;
-  text-decoration: none;
-  border: 1px solid rgba(197, 155, 78, 0.2);
-  transition: all 0.2s ease;
-
-  .arrowIcon {
-    color: var(--main_color);
-    transition: transform 0.2s ease;
-  }
-
-  @media (hover: hover) {
-    &:hover {
-      background: var(--secondary_color);
-      color: #ffffff;
-      border-color: var(--secondary_color);
-
-      .arrowIcon {
-        color: #ffffff;
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 7.5px 12px;
-    font-size: 12px;
   }
 }

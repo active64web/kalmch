@@ -1,9 +1,12 @@
 import React from "react";
 import { SectionHeader } from "@/components/common/SectionHeader";
-import { visitorsData } from "@/data/visitors.data";
+import { analyticsService } from "@/server/services/analytics.service";
+import { FlagImage } from "./FlagImage";
 import styles from "./VisitorsSection.module.scss";
 
-export const VisitorsSection: React.FC = () => {
+export async function VisitorsSection() {
+  const { countries } = await analyticsService.getVisitorsAnalytics();
+
   return (
     <section className={styles.sectionWrapper} aria-label="قرّاء قَلَم حول العالم">
       <div className="container">
@@ -15,7 +18,7 @@ export const VisitorsSection: React.FC = () => {
         />
 
         <div className={styles.visitorsGrid}>
-          {visitorsData.map((country) => (
+          {countries.map((country) => (
             <div
               key={country.id}
               className={styles.countryCard}
@@ -23,16 +26,12 @@ export const VisitorsSection: React.FC = () => {
             >
               <div className={styles.cardHeader}>
                 <div className={styles.flagFrame} aria-hidden="true">
-                  {/* High quality flag CDN with native alt and lazy load */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://flagcdn.com/w80/${country.code}.png`}
-                    srcSet={`https://flagcdn.com/w80/${country.code}.png 1x, https://flagcdn.com/w160/${country.code}.png 2x`}
-                    alt={`علم ${country.name}`}
-                    width={40}
-                    height={28}
+                  <FlagImage
+                    flagUrl={country.flagUrl}
+                    code={country.code}
+                    name={country.name}
+                    flagEmoji={country.flagEmoji}
                     className={styles.flagImage}
-                    loading="lazy"
                   />
                 </div>
 
@@ -55,4 +54,4 @@ export const VisitorsSection: React.FC = () => {
       </div>
     </section>
   );
-};
+}

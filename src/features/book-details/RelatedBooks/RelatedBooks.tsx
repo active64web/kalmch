@@ -6,22 +6,34 @@ import styles from "./RelatedBooks.module.scss";
 
 interface RelatedBooksProps {
   currentBook: BookItem;
+  relatedBooks?: BookItem[];
 }
 
-export const RelatedBooks: React.FC<RelatedBooksProps> = ({ currentBook }) => {
-  // Find related books in the same category
-  let related = booksData.filter(
-    (b) => b.categorySlug === currentBook.categorySlug && b.id !== currentBook.id
-  );
+export const RelatedBooks: React.FC<RelatedBooksProps> = ({
+  currentBook,
+  relatedBooks,
+}) => {
+  // Use API relatedBooks if available, otherwise fallback to local books
+  let related: BookItem[] = [];
 
-  // If not enough in category, pick other popular/latest books
-  if (related.length < 5) {
-    const others = booksData.filter(
-      (b) => b.id !== currentBook.id && !related.some((r) => r.id === b.id)
+  if (relatedBooks && relatedBooks.length > 0) {
+    related = relatedBooks.filter((b) => b.id !== currentBook.id).slice(0, 5);
+  }
+
+  if (related.length === 0) {
+    related = booksData.filter(
+      (b) =>
+        b.categorySlug === currentBook.categorySlug && b.id !== currentBook.id
     );
-    related = [...related, ...others].slice(0, 5);
-  } else {
-    related = related.slice(0, 5);
+
+    if (related.length < 5) {
+      const others = booksData.filter(
+        (b) => b.id !== currentBook.id && !related.some((r) => r.id === b.id)
+      );
+      related = [...related, ...others].slice(0, 5);
+    } else {
+      related = related.slice(0, 5);
+    }
   }
 
   if (related.length === 0) return null;

@@ -2,9 +2,9 @@ export interface CategoryItem {
   id: string;
   slug: string;
   title: string;
-  description: string;
+  description?: string;
   booksCount: number;
-  iconName: "Flame" | "ScrollText" | "Milestone" | "Library" | "Languages" | "FileText" | "BookOpen";
+  iconName?: "Flame" | "ScrollText" | "Milestone" | "Library" | "Languages" | "FileText" | "BookOpen";
 }
 
 export const categoriesData: CategoryItem[] = [

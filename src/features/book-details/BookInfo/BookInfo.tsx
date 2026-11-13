@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   BookOpen,
   Heart,
@@ -9,11 +8,12 @@ import {
   Globe,
   Share2,
   Check,
-  Star,
   Eye,
+  AlertCircle,
 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
+import { recordBookReadAction } from "@/server/actions/book.actions";
 import styles from "./BookInfo.module.scss";
 
 interface BookInfoProps {
@@ -24,12 +24,55 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
   const { isBookSaved, toggleSaveBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
   const [copied, setCopied] = useState(false);
+  const [failedCover, setFailedCover] = useState<string | null>(null);
+  const [readsCount, setReadsCount] = useState<number>(Number(book.readsCount ?? 0));
+  const [hasRecordedRead, setHasRecordedRead] = useState<boolean>(false);
+  const [readError, setReadError] = useState<string | null>(null);
 
   const defaultDescription =
     book.description ||
     `يُعد كتاب "${book.title}" للمؤلف ${book.author} من المؤلفات الروحية والدراسية القيّمة في التراث الكنسي والمكتبة المسيحية. يتناول الكتاب أبعاداً روحية وعقائدية عميقة تهدف إلى بناء الفكر القويم، وترسيخ أصول الحياة الروحية وحياة الصلاة والفضيلة، وتقديم إرشادات نافعة لكل مؤمن يبحث عن النمو الروحي والمعرفة الحقيقية.`;
 
-  const reads = book.readsCount || 1250;
+  const formattedReads = readsCount.toLocaleString("en-US");
+  const rawFileUrl = book.pdfUrl?.trim() || "";
+  const readerPdfUrl = rawFileUrl
+    ? (rawFileUrl.includes("#")
+        ? rawFileUrl
+        : `${rawFileUrl}#toolbar=0&navpanes=0&zoom=100`)
+    : "#";
+  const hasCover = Boolean(book.coverImage) && failedCover !== book.coverImage;
+
+  const handleReadClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // If file_url is missing / null / empty, prevent opening and show error
+    if (!rawFileUrl || rawFileUrl === "#") {
+      e.preventDefault();
+      setReadError(
+        "عذراً، الملف الإلكتروني (PDF) لهذا الكتاب غير متوفر للقراءة حالياً، وجاري تجهيزه من قبل إدارة المكتبة."
+      );
+      return;
+    }
+
+    setReadError(null);
+
+    // Only fire POST /api/books/:id/read when user actually reads a valid file
+    if (!hasRecordedRead) {
+      setHasRecordedRead(true);
+      setReadsCount((prev) => prev + 1);
+
+      // 1. Call server action
+      recordBookReadAction(book.id).catch(() => {});
+
+      // 2. Direct browser fetch with keepalive as dual guarantee
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://ch-library.eladrabarakelkhyam.com";
+      fetch(`${apiUrl}/api/books/${encodeURIComponent(book.id)}/read`, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        keepalive: true,
+      }).catch(() => {});
+    }
+  };
 
   const handleShare = () => {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -55,15 +98,16 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
         <div className={styles.coverColumn}>
           <div
             className={`${styles.coverBox} ${
-              book.coverImage ? styles.hasPoster : ""
+              hasCover ? styles.hasPoster : ""
             }`}
           >
-            {book.coverImage ? (
+            {hasCover ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={book.coverImage}
                 alt={book.title}
                 className={styles.coverPoster}
+                onError={() => setFailedCover(book.coverImage || "")}
               />
             ) : (
               <div className={styles.placeholderIconBox} aria-hidden="true">
@@ -104,32 +148,14 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
             <strong>{book.author}</strong>
           </p>
 
-          {/* Star Rating & Reads Row */}
-          <div
-            className={styles.ratingRow}
-            aria-label={`تقييم ${book.rating || 5} من 5 نجوم`}
-          >
-            <div className={styles.starGroup}>
-              {[...Array(5)].map((_, idx) => (
-                <Star
-                  key={idx}
-                  size={16}
-                  className={styles.starIcon}
-                  fill="var(--main_color)"
-                  color="var(--main_color)"
-                />
-              ))}
-            </div>
-            <span className={styles.ratingValue}>{book.rating || 5}.0</span>
-
-            <span className={styles.dotDivider}>•</span>
-
+          {/* Reads Row (Rating removed as requested) */}
+          <div className={styles.ratingRow}>
             <div
               className={styles.readsCountBadge}
-              title={`${reads.toLocaleString("en-US")} قراءة ومطالعة`}
+              title={`${formattedReads} مشاهدة ومطالعة`}
             >
               <Eye size={15} className={styles.readsIcon} />
-              <span>{reads.toLocaleString("en-US")} قراءة</span>
+              <span>{formattedReads} مشاهدة</span>
             </div>
           </div>
 
@@ -156,16 +182,21 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
 
           {/* Primary Action Buttons */}
           <div className={styles.actionsBar}>
-            <Link
-              href={`/categories/${encodeURIComponent(
-                book.categorySlug
-              )}/${encodeURIComponent(book.slug)}/read`}
+            <a
+              href={readerPdfUrl}
+              target={rawFileUrl ? "_blank" : undefined}
+              rel={rawFileUrl ? "noopener noreferrer" : undefined}
+              onClick={handleReadClick}
               className={styles.readNowBtn}
-              title="ابدأ قراءة الكتاب عبر عارض الـ PDF في المتصفح"
+              title={
+                rawFileUrl
+                  ? "فتح وقراءة الكتاب في تبويب جديد"
+                  : "الملف الإلكتروني غير متوفر حالياً"
+              }
             >
               <BookOpen size={18} />
               <span>قراءة الكتاب الآن</span>
-            </Link>
+            </a>
 
             <button
               type="button"
@@ -201,6 +232,17 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
               </span>
             </button>
           </div>
+
+          {/* Read Error Message */}
+          {readError && (
+            <div className={styles.readErrorAlert} role="alert">
+              <AlertCircle size={18} className={styles.alertIcon} />
+              <div className={styles.alertContent}>
+                <strong>غير متوفر للقراءة حالياً</strong>
+                <p>{readError}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

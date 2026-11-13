@@ -1,11 +1,10 @@
 import React from "react";
 import { Metadata } from "next";
-import { articlesData } from "@/data/articles.data";
 import { PageHeader } from "@/components/common/PageHeader";
-import { ArticleCard } from "@/components/common/ArticleCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
-import styles from "./ArticlesPage.module.scss";
+import { articlesService } from "@/server/services/articles.service";
+import { ArticlesList } from "./ArticlesList";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,7 +25,12 @@ export const metadata: Metadata = constructMetadata({
   ],
 });
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const result = await articlesService.getArticles({
+    page: 1,
+    perPage: 15,
+  });
+
   return (
     <div className="page-main-wrapper">
       {/* 1. Page Header */}
@@ -37,14 +41,13 @@ export default function ArticlesPage() {
         breadcrumbs={[{ label: "المقالات" }]}
       />
 
-      {/* 2. Articles Grid (4 in each row on Desktop) */}
+      {/* 2. Articles Grid with Load More */}
       <section aria-label="قائمة المقالات والدراسات">
         <div className="container">
-          <div className={styles.articlesGrid}>
-            {articlesData.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
+          <ArticlesList
+            initialArticles={result.articles}
+            initialHasMore={result.hasMore}
+          />
         </div>
       </section>
 

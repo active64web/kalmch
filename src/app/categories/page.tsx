@@ -1,6 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
-import { categoriesData } from "@/data/categories.data";
+import { categoriesService } from "@/server/services/categories.service";
 import { PageHeader } from "@/components/common/PageHeader";
 import { CategoryCard } from "@/components/common/CategoryCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
@@ -24,7 +24,9 @@ export const metadata: Metadata = constructMetadata({
   ],
 });
 
-export default function CategoriesPage() {
+export default async function CategoriesPage() {
+  const categories = await categoriesService.getCategories();
+
   return (
     <div className="page-main-wrapper">
       {/* 1. Page Header */}
@@ -46,7 +48,7 @@ export default function CategoriesPage() {
               width: "100%",
             }}
           >
-            {categoriesData.map((category) => (
+            {categories.map((category) => (
               <CategoryCard key={category.id} category={category} />
             ))}
           </div>

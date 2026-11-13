@@ -7,12 +7,12 @@ export interface BookItem {
   category: string;
   categorySlug: string;
   coverImage?: string;
-  rating: number; // e.g. 5 or 4.8
+  rating?: number; // e.g. 5 or 4.8
   reviewsCount?: number;
   pagesCount?: number;
   readsCount?: number; // عدد المشاهدات والقراءات
   badge?: "جديد" | "حصري" | "الأكثر قراءة" | "مميز";
-  section: "latest" | "recommended" | "popular" | "history" | "exclusive";
+  section?: "latest" | "recommended" | "popular" | "history" | "exclusive";
   pdfUrl?: string;
   description?: string;
 }

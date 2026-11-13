@@ -1,12 +1,13 @@
 import React from "react";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { ArticleCard } from "@/components/common/ArticleCard";
-import { articlesData } from "@/data/articles.data";
+import { articlesService } from "@/server/services/articles.service";
 import styles from "./ArticlesSection.module.scss";
 
-export const ArticlesSection: React.FC = () => {
-  // Take exactly 8 latest articles (4 per row x 2 rows)
-  const latest8Articles = articlesData.slice(0, 8);
+export async function ArticlesSection() {
+  const allLatest = await articlesService.getLatestArticles();
+  // Ensure maximum 8 articles appear in the section
+  const latestArticles = allLatest.slice(0, 8);
 
   return (
     <section className={styles.sectionWrapper} aria-label="أحدث المقالات والدراسات">
@@ -22,11 +23,11 @@ export const ArticlesSection: React.FC = () => {
         />
 
         <div className={styles.articlesGrid}>
-          {latest8Articles.map((article) => (
+          {latestArticles.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
       </div>
     </section>
   );
-};
+}

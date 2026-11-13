@@ -6,6 +6,7 @@ export interface CountryVisitorItem {
   visitorsCount: number; // عدد الزوار الرقمي
   displayCount: string; // العرض النصي المنسق
   sharePercent: number; // النسبة التقريبية
+  flagUrl?: string; // رابط العلم من الـ API
 }
 
 export const visitorsData: CountryVisitorItem[] = [

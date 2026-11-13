@@ -4,7 +4,16 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, LogIn, X, Bookmark } from "lucide-react";
+import {
+  Search,
+  LogIn,
+  X,
+  Bookmark,
+  User as UserIcon,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./Header.module.scss";
 
 const navLinks = [
@@ -18,10 +27,13 @@ const navLinks = [
 export const Header: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   // Throttled scroll listener using requestAnimationFrame to eliminate scroll jank
   useEffect(() => {
@@ -42,18 +54,36 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile search on route change without triggering cascading effect renders
+  // Close mobile search and user menu on route change
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);
     setIsMobileSearchOpen(false);
+    setIsUserMenuOpen(false);
   }
+
+  // Close user dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   // Smooth mobile focus/blur without causing layout thrashing or keyboard animation stutter
   useEffect(() => {
     if (isMobileSearchOpen) {
-      // Delay focus slightly (200ms) so drawer animation slides down at 60fps first
-      // before virtual keyboard pops up and causes viewport resize
       const timer = setTimeout(() => {
         mobileInputRef.current?.focus();
       }, 200);
@@ -77,6 +107,13 @@ export const Header: React.FC = () => {
 
   const toggleMobileSearch = () => {
     setIsMobileSearchOpen((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    setIsUserMenuOpen(false);
+    await logout();
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -141,7 +178,7 @@ export const Header: React.FC = () => {
           </button>
         </form>
 
-        {/* 4. Action Buttons (Search Toggle on Mobile, My Library Icon, Login) */}
+        {/* 4. Action Buttons (Search Toggle on Mobile, User Menu / Login) */}
         <div className={styles.actionsGroup}>
           <button
             type="button"
@@ -153,26 +190,84 @@ export const Header: React.FC = () => {
             {isMobileSearchOpen ? <X size={19} /> : <Search size={19} />}
           </button>
 
-          <Link
-            href="/my-library"
-            className={`${styles.libraryBtn} ${
-              pathname.startsWith("/my-library") ? styles.active : ""
-            }`}
-            title="مكتبتي"
-            aria-label="مكتبتي"
-          >
-            <Bookmark size={18} />
-          </Link>
+          {isAuthenticated && user ? (
+            <div className={styles.userMenuWrapper} ref={userMenuRef}>
+              <button
+                type="button"
+                className={`${styles.loginBtn} ${styles.userMenuTrigger} ${
+                  isUserMenuOpen ? styles.menuOpen : ""
+                }`}
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                title={`حساب ${user.name}`}
+                aria-expanded={isUserMenuOpen}
+                aria-haspopup="true"
+              >
+                <UserIcon size={17} />
+                <span className={styles.loginText}>
+                  {user.name.split(" ")[0]}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`${styles.menuChevron} ${
+                    isUserMenuOpen ? styles.rotateChevron : ""
+                  }`}
+                />
+              </button>
 
-          <Link
-            href="/login"
-            className={styles.loginBtn}
-            title="تسجيل الدخول"
-            aria-label="تسجيل الدخول"
-          >
-            <LogIn size={17} />
-            <span className={styles.loginText}>تسجيل الدخول</span>
-          </Link>
+              {isUserMenuOpen && (
+                <div className={styles.userDropdownMenu} role="menu">
+                  <div className={styles.dropdownHeader}>
+                    <span className={styles.dropdownUserName}>{user.name}</span>
+                    <span className={styles.dropdownUserEmail}>{user.email}</span>
+                  </div>
+
+                  <div className={styles.dropdownDivider} />
+
+                  <Link
+                    href="/profile"
+                    className={styles.dropdownItem}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    role="menuitem"
+                  >
+                    <UserIcon size={16} />
+                    <span>حسابي</span>
+                  </Link>
+
+                  <Link
+                    href="/my-library"
+                    className={styles.dropdownItem}
+                    onClick={() => setIsUserMenuOpen(false)}
+                    role="menuitem"
+                  >
+                    <Bookmark size={16} />
+                    <span>مكتبتي</span>
+                  </Link>
+
+                  <div className={styles.dropdownDivider} />
+
+                  <button
+                    type="button"
+                    className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                    onClick={handleLogout}
+                    role="menuitem"
+                  >
+                    <LogOut size={16} />
+                    <span>تسجيل الخروج</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className={styles.loginBtn}
+              title="تسجيل الدخول"
+              aria-label="تسجيل الدخول"
+            >
+              <LogIn size={17} />
+              <span className={styles.loginText}>تسجيل الدخول</span>
+            </Link>
+          )}
         </div>
       </div>
 

@@ -12,9 +12,13 @@ export interface ArticleItem {
   authorId?: string;
   category: string;
   categorySlug: string;
+  type?: string;
   publishedAt: string;
   readingTime: string;
+  readTime?: number;
   readsCount: number;
+  viewsCount?: number;
+  shortDescription?: string;
   coverImage?: string;
 }
 

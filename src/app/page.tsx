@@ -10,6 +10,8 @@ import {
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = constructMetadata({
   title: "قَلَم | منصة الكتب والمؤلفات المسيحية",
   description:

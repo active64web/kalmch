@@ -1,12 +1,13 @@
 import React from "react";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { BookCard } from "@/components/common/BookCard";
-import { booksData } from "@/data/books.data";
+import { booksService } from "@/server/services/books.service";
 import styles from "./BooksSection.module.scss";
 
-export const BooksSection: React.FC = () => {
-  // Take 10 latest books (5 per row x 2 rows)
-  const latest10Books = booksData.slice(0, 10);
+export async function BooksSection() {
+  const allLatest = await booksService.getLatestBooks();
+  // Ensure maximum 10 books appear in the section
+  const latestBooks = allLatest.slice(0, 10);
 
   return (
     <section className={styles.sectionWrapper} aria-label="أحدث الكتب">
@@ -21,11 +22,11 @@ export const BooksSection: React.FC = () => {
         />
 
         <div className={styles.booksGrid}>
-          {latest10Books.map((book) => (
+          {latestBooks.map((book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>
       </div>
     </section>
   );
-};
+}

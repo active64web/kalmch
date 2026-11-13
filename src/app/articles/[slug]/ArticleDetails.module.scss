@@ -61,6 +61,18 @@
     margin-bottom: 18px;
     border-radius: 10px;
   }
+
+  &.hasPoster {
+    border: 1px solid rgba(197, 155, 78, 0.35);
+
+    .coverPoster {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+  }
 }
 
 /* 2. Article Header Meta */
@@ -126,7 +138,8 @@
   }
 }
 
-/* Short excerpt displayed under the title before body */
+/* Short description displayed under the title before body */
+.articleShortDesc,
 .articleExcerpt {
   font-size: 13.5px;
   line-height: 1.68;
@@ -277,6 +290,8 @@
     }
   }
 }
+
+
 
 /* 4. More Articles Section */
 .moreSection {

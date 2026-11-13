@@ -91,6 +91,16 @@
   }
 }
 
+.coverLink {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border-radius: inherit;
+}
+
 .placeholderIconBox {
   display: flex;
   align-items: center;
@@ -179,6 +189,16 @@
   }
 }
 
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--main_color);
+  }
+}
+
 .authorName {
   font-size: 11.5px;
   color: rgba(61, 37, 12, 0.65);
@@ -193,11 +213,11 @@
   }
 }
 
-/* 5. Rating Stars & Reads Count */
+/* 5. Reads Count */
 .ratingRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 6px;
   margin-top: 5px;
   width: 100%;

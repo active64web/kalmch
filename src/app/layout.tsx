@@ -4,7 +4,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ScrollToTop } from "@/components/common/ScrollToTop";
+import { VisitorTracker } from "@/components/common/VisitorTracker";
 import { LibraryProvider } from "@/context/LibraryContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { BASE_URL, SITE_NAME, DEFAULT_OG_IMAGE } from "@/utils/seo";
 import "@/styles/global.scss";
 
@@ -88,13 +90,16 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={almarai.variable}>
       <body className={almarai.className}>
-        <LibraryProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <ScrollToTop />
-          <BottomNav />
-        </LibraryProvider>
+        <AuthProvider>
+          <LibraryProvider>
+            <VisitorTracker />
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            <ScrollToTop />
+            <BottomNav />
+          </LibraryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

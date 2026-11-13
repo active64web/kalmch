@@ -52,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 3. Books Detail Pages
   const bookRoutes: MetadataRoute.Sitemap = booksData.map((book) => ({
-    url: `${BASE_URL}/categories/${book.categorySlug}/${book.slug}`,
+    url: `${BASE_URL}/categories/${book.categorySlug}/${book.id}`,
     lastModified: currentDate,
     changeFrequency: "monthly",
     priority: 0.8,

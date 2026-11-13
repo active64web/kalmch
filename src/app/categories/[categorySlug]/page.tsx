@@ -1,10 +1,10 @@
 import React from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { categoriesData } from "@/data/categories.data";
-import { booksData } from "@/data/books.data";
+import { categoriesService } from "@/server/services/categories.service";
+import { booksService } from "@/server/services/books.service";
 import { PageHeader } from "@/components/common/PageHeader";
-import { BookCard } from "@/components/common/BookCard";
+import { CategoryBooksList } from "@/features/categories/CategoryBooksList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 
 import { constructMetadata } from "@/utils/seo";
@@ -22,7 +22,8 @@ export async function generateMetadata({
 }: CategoryBooksPageProps): Promise<Metadata> {
   const { categorySlug } = await params;
   const decodedSlug = decodeURIComponent(categorySlug);
-  const category = categoriesData.find((c) => c.slug === decodedSlug);
+  const categories = await categoriesService.getCategories();
+  const category = categories.find((c) => c.slug === decodedSlug);
 
   if (!category) {
     return constructMetadata({
@@ -34,7 +35,9 @@ export async function generateMetadata({
 
   return constructMetadata({
     title: `كتب ${category.title} | قَلَم - المكتبة المسيحية`,
-    description: category.description,
+    description:
+      category.description ||
+      `استعرض واقرأ كتب قسم ${category.title} في المكتبة المسيحية على منصة قَلَم.`,
     path: `/categories/${category.slug}`,
     keywords: [
       `كتب ${category.title}`,
@@ -51,15 +54,24 @@ export default async function CategoryBooksPage({
 }: CategoryBooksPageProps) {
   const { categorySlug } = await params;
   const decodedSlug = decodeURIComponent(categorySlug);
-  const category = categoriesData.find((c) => c.slug === decodedSlug);
+  const categories = await categoriesService.getCategories();
+  const category = categories.find((c) => c.slug === decodedSlug);
 
   if (!category) {
     notFound();
   }
 
-  const categoryBooks = booksData.filter(
-    (b) => b.categorySlug === category.slug
-  );
+  // Fetch initial books for this category from API (page 1, per_page 15)
+  const { books, hasMore } = await booksService.getCategoryBooks({
+    categoryId: category.id,
+    categorySlug: category.slug,
+    page: 1,
+    perPage: 15,
+  });
+
+  const categorySubtitle =
+    category.description ||
+    `تصفح كافة الكتب والمؤلفات المصنفة ضمن قسم ${category.title}.`;
 
   return (
     <div className="page-main-wrapper">
@@ -67,53 +79,23 @@ export default async function CategoryBooksPage({
       <PageHeader
         badge="كتب القسم"
         title={category.title}
-        subtitle={category.description}
+        subtitle={categorySubtitle}
         breadcrumbs={[
           { label: "الأقسام", href: "/categories" },
           { label: category.title },
         ]}
       />
 
-      {/* 2. Category Books Grid */}
+      {/* 2. Category Books Grid with Load More */}
       <section aria-label={`كتب قسم ${category.title}`}>
         <div className="container">
-          {categoryBooks.length > 0 ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "20px",
-                width: "100%",
-              }}
-            >
-              {categoryBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
-            </div>
-          ) : (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "60px 20px",
-                background: "#ffffff",
-                borderRadius: "16px",
-                border: "1px dashed rgba(197, 155, 78, 0.3)",
-              }}
-            >
-              <h3
-                style={{
-                  color: "var(--secondary_color)",
-                  fontSize: "18px",
-                  marginBottom: "8px",
-                }}
-              >
-                جاري إضافة كتب هذا القسم قريباً
-              </h3>
-              <p style={{ color: "rgba(61, 37, 12, 0.7)", fontSize: "14px" }}>
-                نعمل حالياً على أرشفة وتدقيق مؤلفات قسم {category.title}.
-              </p>
-            </div>
-          )}
+          <CategoryBooksList
+            initialBooks={books}
+            initialHasMore={hasMore}
+            categoryId={category.id}
+            categorySlug={category.slug}
+            categoryTitle={category.title}
+          />
         </div>
       </section>
 

@@ -1,12 +1,13 @@
 import React from "react";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { CategoryCard } from "@/components/common/CategoryCard";
-import { categoriesData } from "@/data/categories.data";
+import { categoriesService } from "@/server/services/categories.service";
 import styles from "./CategoriesSection.module.scss";
 
-export const CategoriesSection: React.FC = () => {
-  // Take 6 categories
-  const displayCategories = categoriesData.slice(0, 6);
+export async function CategoriesSection() {
+  // Fetch categories from API and display only the first 6 on the home page
+  const categories = await categoriesService.getCategories();
+  const displayCategories = categories.slice(0, 6);
 
   return (
     <section className={styles.sectionWrapper} aria-label="أقسام الكتب">

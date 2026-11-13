@@ -1,8 +1,8 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import Link from "next/link";
-import { Heart, Star, BookOpen, Trash2, Eye } from "lucide-react";
+import { Heart, BookOpen, Trash2, Eye } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
 import styles from "./BookCard.module.scss";
@@ -24,6 +24,7 @@ const BookCardComponent: React.FC<BookCardProps> = ({
 }) => {
   const { isBookSaved, toggleSaveBook, removeBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
+  const [failedCover, setFailedCover] = useState<string | null>(null);
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -40,37 +41,46 @@ const BookCardComponent: React.FC<BookCardProps> = ({
   };
 
   const isLibraryVariant = variant === "library" || showRemoveButton;
+  const categorySlug = book.categorySlug || "general";
   const bookDetailsPath = `/categories/${encodeURIComponent(
-    book.categorySlug
-  )}/${encodeURIComponent(book.slug)}`;
+    categorySlug
+  )}/${encodeURIComponent(book.id)}`;
 
-  const reads = book.readsCount || 1250;
+  const reads = Number(book.readsCount ?? 0);
   const formattedReads = reads.toLocaleString("en-US");
+  const hasCover = Boolean(book.coverImage) && failedCover !== book.coverImage;
 
   return (
     <div
       className={styles.cardContainer}
       aria-label={`كتاب ${book.title} للمؤلف ${book.author}`}
     >
-      {/* 1. Compact Cover Box with Poster support and Independent Favorite Button */}
+      {/* 1. Compact Cover Box with Poster support, fallback onError and Independent Favorite Button */}
       <div
         className={`${styles.coverBox} ${
-          book.coverImage ? styles.hasPoster : ""
+          hasCover ? styles.hasPoster : ""
         }`}
       >
-        {book.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={book.coverImage}
-            alt={book.title}
-            className={styles.coverPoster}
-            loading="lazy"
-          />
-        ) : (
-          <div className={styles.placeholderIconBox} aria-hidden="true">
-            <BookOpen size={20} />
-          </div>
-        )}
+        <Link
+          href={bookDetailsPath}
+          className={styles.coverLink}
+          title={`عرض تفاصيل كتاب ${book.title}`}
+        >
+          {hasCover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={book.coverImage}
+              alt={book.title}
+              className={styles.coverPoster}
+              loading="lazy"
+              onError={() => setFailedCover(book.coverImage || "")}
+            />
+          ) : (
+            <div className={styles.placeholderIconBox} aria-hidden="true">
+              <BookOpen size={20} />
+            </div>
+          )}
+        </Link>
 
         {/* Floating Heart / Favorite Button */}
         <button
@@ -91,36 +101,23 @@ const BookCardComponent: React.FC<BookCardProps> = ({
       {/* 2. Book Info */}
       <div className={styles.infoBox}>
         <h4 className={styles.bookTitle} title={book.title}>
-          {book.title}
+          <Link href={bookDetailsPath} className={styles.titleLink}>
+            {book.title}
+          </Link>
         </h4>
 
         <p className={styles.authorName} title={book.author}>
           {book.author}
         </p>
 
-        {/* 3. Star Rating & Reads/Views Count */}
+        {/* 3. Reads / Views Count (Rating removed as requested) */}
         <div className={styles.ratingRow}>
-          <div className={styles.starRating} aria-label={`تقييم 5 نجوم`}>
-            <div className={styles.starGroup}>
-              {[...Array(5)].map((_, idx) => (
-                <Star
-                  key={idx}
-                  size={11}
-                  className={styles.starIcon}
-                  fill="var(--main_color)"
-                  color="var(--main_color)"
-                />
-              ))}
-            </div>
-            <span className={styles.ratingValue}>{book.rating || 5}.0</span>
-          </div>
-
           <div
             className={styles.readsCount}
-            title={`${reads.toLocaleString("en-US")} قراءة`}
+            title={`${formattedReads} مشاهدة`}
           >
             <Eye size={12} className={styles.readsIcon} />
-            <span>{formattedReads}</span>
+            <span>{formattedReads} مشاهدة</span>
           </div>
         </div>
       </div>

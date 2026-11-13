@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { User, Phone, Mail, Lock, Eye, EyeOff, UserPlus } from "lucide-react";
 import { GoogleIcon } from "./GoogleIcon";
+import { useAuth } from "@/context/AuthContext";
+import { promptGoogleAccessToken } from "@/utils/google-auth";
 import styles from "./AuthContainer.module.scss";
 
 interface RegisterFormProps {
@@ -12,6 +15,9 @@ interface RegisterFormProps {
 export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSwitchToLogin,
 }) => {
+  const router = useRouter();
+  const { register, googleLogin } = useAuth();
+
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -23,7 +29,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -44,22 +50,70 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     }
 
     setIsLoading(true);
-    // Simulate register
-    setTimeout(() => {
-      setIsLoading(false);
-      setSuccessMessage(
-        "تم إنشاء الحساب بنجاح! مرحباً بك في عائلة قَلَم، جاري الدخول..."
+
+    try {
+      const result = await register({
+        name: fullName.trim(),
+        email: email.trim(),
+        password,
+        password_confirmation: confirmPassword,
+        phone: phone.trim() || undefined,
+      });
+
+      if (result.success) {
+        setSuccessMessage(
+          result.message ||
+            "تم إنشاء الحساب بنجاح! مرحباً بك في عائلة قَلَم، جاري الدخول..."
+        );
+        setTimeout(() => {
+          router.push("/my-library");
+          router.refresh();
+        }, 600);
+      } else {
+        setErrorMessage(
+          result.error || "فشل إنشاء الحساب، يرجى مراجعة البيانات المدخلة"
+        );
+      }
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "حدث خطأ غير متوقع أثناء إنشاء الحساب"
       );
-    }, 900);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleRegister = () => {
+  const handleGoogleRegister = async () => {
     setIsLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
+    setSuccessMessage("");
+
+    try {
+      const googleToken = await promptGoogleAccessToken();
+      const result = await googleLogin(googleToken);
+
+      if (result.success) {
+        setSuccessMessage(
+          result.message || "تم إنشاء الحساب والربط بنجاح عبر حساب Google!"
+        );
+        setTimeout(() => {
+          router.push("/my-library");
+          router.refresh();
+        }, 600);
+      } else {
+        setErrorMessage(result.error || "فشل التسجيل عبر حساب Google");
+      }
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "تعذر إكمال التسجيل عبر Google"
+      );
+    } finally {
       setIsLoading(false);
-      setSuccessMessage("تم إنشاء الحساب والربط بنجاح عبر حساب Google!");
-    }, 800);
+    }
   };
 
   return (
@@ -109,6 +163,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             className={styles.textInput}
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -129,6 +184,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             onChange={(e) => setPhone(e.target.value)}
             className={styles.textInput}
             dir="ltr"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -149,6 +205,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             className={styles.textInput}
             dir="ltr"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -168,6 +225,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={styles.textInput}
+            disabled={isLoading}
           />
           <button
             type="button"
@@ -196,6 +254,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className={styles.textInput}
+            disabled={isLoading}
           />
           <button
             type="button"
@@ -211,7 +270,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* 8. Submit Button */}
       <button
         type="submit"
         disabled={isLoading}
@@ -221,7 +280,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <span>{isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب جديد"}</span>
       </button>
 
-      {/* 10. Switch to Login */}
+      {/* 9. Switch to Login */}
       <div className={styles.switchAuthRow}>
         <span>لديك حساب بالفعل؟</span>
         <button
@@ -235,4 +294,3 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     </form>
   );
 };
-

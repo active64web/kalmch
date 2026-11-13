@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, LogIn } from "lucide-react";
 import { GoogleIcon } from "./GoogleIcon";
+import { useAuth } from "@/context/AuthContext";
+import { promptGoogleAccessToken } from "@/utils/google-auth";
 import styles from "./AuthContainer.module.scss";
 
 interface LoginFormProps {
@@ -14,6 +17,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   onForgotPassword,
   onSwitchToRegister,
 }) => {
+  const router = useRouter();
+  const { login, googleLogin } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,31 +28,78 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       setErrorMessage("يرجى إدخال البريد الإلكتروني وكلمة المرور");
       return;
     }
 
     setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
+
+    try {
+      const result = await login({
+        email: email.trim(),
+        password,
+        rememberMe,
+      });
+
+      if (result.success) {
+        setSuccessMessage(
+          result.message || "مرحباً بك مجدداً! جاري الدخول إلى حسابك..."
+        );
+        setTimeout(() => {
+          router.push("/my-library");
+          router.refresh();
+        }, 600);
+      } else {
+        setErrorMessage(
+          result.error || "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+        );
+      }
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "حدث خطأ غير متوقع أثناء تسجيل الدخول"
+      );
+    } finally {
       setIsLoading(false);
-      setSuccessMessage("مرحباً بك مجدداً! جاري الدخول إلى مكتبتك...");
-    }, 800);
+    }
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
     setErrorMessage("");
-    setTimeout(() => {
+    setSuccessMessage("");
+
+    try {
+      const googleToken = await promptGoogleAccessToken();
+      const result = await googleLogin(googleToken);
+
+      if (result.success) {
+        setSuccessMessage(
+          result.message || "تم تسجيل الدخول بنجاح عبر حساب Google!"
+        );
+        setTimeout(() => {
+          router.push("/my-library");
+          router.refresh();
+        }, 600);
+      } else {
+        setErrorMessage(result.error || "فشل تسجيل الدخول عبر حساب Google");
+      }
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error
+          ? err.message
+          : "تعذر إكمال تسجيل الدخول عبر Google"
+      );
+    } finally {
       setIsLoading(false);
-      setSuccessMessage("تم تسجيل الدخول بنجاح عبر حساب Google!");
-    }, 800);
+    }
   };
 
   return (
@@ -97,6 +150,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             className={styles.textInput}
             dir="ltr"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -125,6 +179,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className={styles.textInput}
+            disabled={isLoading}
           />
           <button
             type="button"
@@ -146,9 +201,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
             className={styles.checkboxInput}
+            disabled={isLoading}
           />
           <span className={styles.checkboxCustom} />
-          <span className={styles.checkboxText}>تذكر تسجيل دخولي على هذا الجهاز</span>
+          <span className={styles.checkboxText}>
+            تذكر تسجيل دخولي على هذا الجهاز
+          </span>
         </label>
       </div>
 
@@ -176,4 +234,3 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     </form>
   );
 };
-

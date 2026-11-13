@@ -2,9 +2,12 @@
 
 import React, { memo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, BookOpen, Trash2, Eye } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
+import { useAuth } from "@/context/AuthContext";
+import { getClientCookie, AUTH_TOKEN_COOKIE } from "@/utils/cookies";
 import styles from "./BookCard.module.scss";
 
 export interface BookCardProps {
@@ -22,15 +25,26 @@ const BookCardComponent: React.FC<BookCardProps> = ({
   onRemove,
   onToggleFavorite,
 }) => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { isBookSaved, toggleSaveBook, removeBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
   const [failedCover, setFailedCover] = useState<string | null>(null);
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleSaveBook(book);
-    onToggleFavorite?.(book.id, !isFavorite);
+
+    const activeToken = getClientCookie(AUTH_TOKEN_COOKIE);
+    if (!isAuthenticated && !activeToken) {
+      router.push("/login");
+      return;
+    }
+
+    const result = await toggleSaveBook(book);
+    if (result.success) {
+      onToggleFavorite?.(book.id, !isFavorite);
+    }
   };
 
   const handleRemove = (e: React.MouseEvent) => {

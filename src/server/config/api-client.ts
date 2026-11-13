@@ -51,22 +51,42 @@ export async function apiClient<T>(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    let errorMessage =
-      errorData.message || `API Request failed with status ${response.status}`;
+    const errorText = await response.text().catch(() => "");
+    let errorMessage = `API Request failed with status ${response.status}`;
+    let errors: Record<string, string[]> | undefined;
 
-    // Extract detailed validation errors if available (Laravel format)
-    if (errorData.errors && typeof errorData.errors === "object") {
-      const messages = Object.values(errorData.errors)
-        .flat()
-        .filter((msg): msg is string => typeof msg === "string");
-      if (messages.length > 0) {
-        errorMessage = messages.join(" - ");
+    if (errorText) {
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData && typeof errorData === "object") {
+          if (errorData.message) errorMessage = errorData.message;
+          if (errorData.errors && typeof errorData.errors === "object") {
+            errors = errorData.errors;
+            const messages = Object.values(errorData.errors)
+              .flat()
+              .filter((msg): msg is string => typeof msg === "string");
+            if (messages.length > 0) {
+              errorMessage = messages.join(" - ");
+            }
+          }
+        }
+      } catch {
+        errorMessage = errorText;
       }
     }
 
-    throw new ApiError(errorMessage, response.status, errorData.errors);
+    throw new ApiError(errorMessage, response.status, errors);
   }
 
-  return response.json();
+  // Handle empty bodies (e.g. 204 No Content or empty 200 responses)
+  const rawText = await response.text().catch(() => "");
+  if (!rawText || !rawText.trim()) {
+    return { success: true } as T;
+  }
+
+  try {
+    return JSON.parse(rawText) as T;
+  } catch {
+    return { success: true, message: rawText } as unknown as T;
+  }
 }

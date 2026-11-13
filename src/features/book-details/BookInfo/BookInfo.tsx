@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   BookOpen,
   Heart,
@@ -13,6 +14,8 @@ import {
 } from "lucide-react";
 import type { BookItem } from "@/data/books.data";
 import { useLibrary } from "@/context/LibraryContext";
+import { useAuth } from "@/context/AuthContext";
+import { getClientCookie, AUTH_TOKEN_COOKIE } from "@/utils/cookies";
 import { recordBookReadAction } from "@/server/actions/book.actions";
 import styles from "./BookInfo.module.scss";
 
@@ -21,6 +24,8 @@ interface BookInfoProps {
 }
 
 export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const { isBookSaved, toggleSaveBook } = useLibrary();
   const isFavorite = isBookSaved(book.id);
   const [copied, setCopied] = useState(false);
@@ -200,7 +205,14 @@ export const BookInfo: React.FC<BookInfoProps> = ({ book }) => {
 
             <button
               type="button"
-              onClick={() => toggleSaveBook(book)}
+              onClick={async () => {
+                const activeToken = getClientCookie(AUTH_TOKEN_COOKIE);
+                if (!isAuthenticated && !activeToken) {
+                  router.push("/login");
+                  return;
+                }
+                await toggleSaveBook(book);
+              }}
               className={`${styles.favoriteToggleBtn} ${
                 isFavorite ? styles.favorited : ""
               }`}

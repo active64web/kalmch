@@ -2,16 +2,18 @@
 
 import React from "react";
 import Link from "next/link";
-import { Bookmark, BookOpen, ArrowLeft } from "lucide-react";
+import { Bookmark, BookOpen, ArrowLeft, LogIn } from "lucide-react";
 import { useLibrary } from "@/context/LibraryContext";
+import { useAuth } from "@/context/AuthContext";
 import { BookCard } from "@/components/common/BookCard";
 import styles from "./LibraryContainer.module.scss";
 
 export const LibraryContainer: React.FC = () => {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const { savedBooks, totalSavedCount, isLoaded } = useLibrary();
 
   // Loading state
-  if (!isLoaded) {
+  if (isAuthLoading || !isLoaded) {
     return (
       <div className={styles.loadingWrapper} aria-label="جاري تحميل مكتبتك">
         <div className={styles.loadingSpinner} />
@@ -20,7 +22,33 @@ export const LibraryContainer: React.FC = () => {
     );
   }
 
-  // Empty State (No books saved)
+  // Unauthenticated State (Not logged in)
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.emptyContainer}>
+        <div className={styles.emptyIconCircle} aria-hidden="true">
+          <Bookmark size={42} className={styles.emptyIcon} />
+        </div>
+        <h2 className={styles.emptyTitle}>يرجى تسجيل الدخول لعرض مكتبتك</h2>
+        <p className={styles.emptyDescription}>
+          للوصول إلى مكتبتك الخاصة ومتابعة كتبك ومؤلفاتك المفضلة المحفوظة، يرجى تسجيل الدخول إلى حسابك في منصة قَلَم.
+        </p>
+
+        <div className={styles.emptyActions}>
+          <Link href="/login" className={styles.primaryActionBtn}>
+            <LogIn size={17} />
+            <span>تسجيل الدخول الآن</span>
+          </Link>
+          <Link href="/register" className={styles.secondaryActionBtn}>
+            <span>إنشاء حساب جديد</span>
+            <ArrowLeft size={16} />
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty State (Logged in, but no books saved)
   if (totalSavedCount === 0) {
     return (
       <div className={styles.emptyContainer}>

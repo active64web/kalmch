@@ -1,12 +1,15 @@
 import React from "react";
 import { SectionHeader } from "@/components/common/SectionHeader";
 import { AuthorCard } from "@/components/common/AuthorCard";
-import { authorsData } from "@/data/authors.data";
+import { authorsService } from "@/server/services/authors.service";
 import styles from "./AuthorsSection.module.scss";
 
-export const AuthorsSection: React.FC = () => {
-  // Take 10 authors (5 per row x 2 rows)
-  const top10Authors = authorsData.slice(0, 10);
+export async function AuthorsSection() {
+  const top10Authors = await authorsService.getTopAuthors(10);
+
+  if (top10Authors.length === 0) {
+    return null;
+  }
 
   return (
     <section className={styles.sectionWrapper} aria-label="أشهر المؤلفين">
@@ -28,5 +31,4 @@ export const AuthorsSection: React.FC = () => {
       </div>
     </section>
   );
-};
-
+}

@@ -2,14 +2,12 @@ import React from "react";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { User, BookOpen } from "lucide-react";
-import { authorsData } from "@/data/authors.data";
-import { booksData } from "@/data/books.data";
+import { User } from "lucide-react";
+import { authorsService } from "@/server/services/authors.service";
 import { PageHeader } from "@/components/common/PageHeader";
-import { BookCard } from "@/components/common/BookCard";
+import { AuthorBooksList } from "./AuthorBooksList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import styles from "./AuthorDetails.module.scss";
-
 import { constructMetadata } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +24,7 @@ export async function generateMetadata({
 }: AuthorDetailsPageProps): Promise<Metadata> {
   const { authorId } = await params;
   const decoded = decodeURIComponent(authorId);
-  const author = authorsData.find((a) => a.slug === decoded || a.id === decoded);
+  const author = await authorsService.getAuthorByIdOrSlug(decoded);
 
   if (!author) {
     return constructMetadata({
@@ -61,24 +59,18 @@ export default async function AuthorDetailsPage({
 }: AuthorDetailsPageProps) {
   const { authorId } = await params;
   const decoded = decodeURIComponent(authorId);
-  const author = authorsData.find((a) => a.slug === decoded || a.id === decoded);
+  const author = await authorsService.getAuthorByIdOrSlug(decoded);
 
   if (!author) {
     notFound();
   }
 
-  // Filter books related to this author
-  const cleanName = author.name
-    .replace(/^(قداسة|نيافة|الأنبا|القمص|الأب|القديس|الشماس)\s+/g, "")
-    .trim();
-
-  const authorBooks = booksData.filter(
-    (b) =>
-      (b.authorId && b.authorId === author.id) ||
-      b.author.includes(author.name) ||
-      author.name.includes(b.author) ||
-      (cleanName.length > 2 && b.author.includes(cleanName))
-  );
+  // Fetch author books from GET /api/authors/{id}/books?page=1&per_page=15
+  const booksResult = await authorsService.getAuthorBooks({
+    authorId: author.id,
+    page: 1,
+    perPage: 15,
+  });
 
   return (
     <div className="page-main-wrapper">
@@ -94,7 +86,10 @@ export default async function AuthorDetailsPage({
       />
 
       {/* 2. Author Profile Card */}
-      <section className={styles.authorSection} aria-label={`معلومات ${author.name}`}>
+      <section
+        className={styles.authorSection}
+        aria-label={`معلومات ${author.name}`}
+      >
         <div className="container">
           <div className={styles.profileCard}>
             <div className={styles.avatarBox}>
@@ -113,40 +108,29 @@ export default async function AuthorDetailsPage({
 
             <h2 className={styles.authorName}>{author.name}</h2>
 
-            {author.bio && (
-              <p className={styles.authorBio}>{author.bio}</p>
-            )}
+            {author.bio && <p className={styles.authorBio}>{author.bio}</p>}
 
-            <div className={styles.statusBadge}>{author.ageOrStatus}</div>
-          </div>
-
-          {/* 3. Author's Books List */}
-          <div className={styles.booksSection}>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>مؤلفات {author.name}</h3>
-              <div className={styles.countBadge}>
-                <span>{authorBooks.length}</span> كتاب متاح
-              </div>
-            </div>
-
-            {authorBooks.length > 0 ? (
-              <div className={styles.booksGrid}>
-                {authorBooks.map((book) => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyCard}>
-                <div style={{ marginBottom: "12px", color: "var(--main_color)" }}>
-                  <BookOpen size={36} />
+            <div className={styles.badgesRow}>
+              {author.country && (
+                <div className={styles.countryBadge}>
+                  <span>{author.country}</span>
+                  {author.countryFlag && <span>{author.countryFlag}</span>}
                 </div>
-                <h4 className={styles.emptyTitle}>لا توجد كتب مفهرسة حالياً</h4>
-                <p className={styles.emptyDesc}>
-                  يعمل فريق التوثيق على رقمنة وإضافة مؤلفات {author.name} في أقرب وقت.
-                </p>
-              </div>
-            )}
+              )}
+              {author.ageOrStatus && (
+                <div className={styles.statusBadge}>{author.ageOrStatus}</div>
+              )}
+            </div>
           </div>
+
+          {/* 3. Author's Books List (with API pagination) */}
+          <AuthorBooksList
+            authorId={author.id}
+            authorName={author.name}
+            initialBooks={booksResult.books}
+            initialHasMore={booksResult.hasMore}
+            total={booksResult.total}
+          />
         </div>
       </section>
 

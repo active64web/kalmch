@@ -1,11 +1,10 @@
 import React from "react";
 import { Metadata } from "next";
-import { authorsData } from "@/data/authors.data";
+import { authorsService } from "@/server/services/authors.service";
 import { PageHeader } from "@/components/common/PageHeader";
-import { AuthorCard } from "@/components/common/AuthorCard";
+import { AuthorsList } from "./AuthorsList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
-import styles from "./AuthorsPage.module.scss";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -27,7 +26,9 @@ export const metadata: Metadata = constructMetadata({
   ],
 });
 
-export default function AuthorsPage() {
+export default async function AuthorsPage() {
+  const allAuthors = await authorsService.getAllAuthors();
+
   return (
     <div className="page-main-wrapper">
       {/* 1. Page Header */}
@@ -38,14 +39,10 @@ export default function AuthorsPage() {
         breadcrumbs={[{ label: "المؤلفون" }]}
       />
 
-      {/* 2. Authors Grid */}
+      {/* 2. Authors List with client-side pagination */}
       <section aria-label="قائمة المؤلفين">
         <div className="container">
-          <div className={styles.authorsGrid}>
-            {authorsData.map((author) => (
-              <AuthorCard key={author.id} author={author} />
-            ))}
-          </div>
+          <AuthorsList authors={allAuthors} perPage={15} />
         </div>
       </section>
 

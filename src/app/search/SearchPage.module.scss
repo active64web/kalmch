@@ -25,6 +25,72 @@
   }
 }
 
+.resultSection {
+  margin-bottom: 40px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+
+  .sectionTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--secondary_color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      color: var(--main_color);
+    }
+  }
+
+  .sectionBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(197, 155, 78, 0.1);
+    color: var(--main_color);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+.authorsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  width: 100%;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 360px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
 .booksGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
@@ -96,4 +162,3 @@
     }
   }
 }
-

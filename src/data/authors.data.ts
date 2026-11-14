@@ -7,6 +7,9 @@ export interface AuthorItem {
   avatar?: string;
   bio?: string;
   booksCount?: number;
+  countryFlag?: string;
+  birthYear?: string | number | null;
+  deathYear?: string | number | null;
 }
 
 export const authorsData: AuthorItem[] = [

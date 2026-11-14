@@ -1,14 +1,13 @@
 import React from "react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { SearchX, ArrowLeft, BookOpen } from "lucide-react";
-import { booksService } from "@/server/services/books.service";
+import { SearchX, ArrowLeft, BookOpen, Users } from "lucide-react";
+import { searchService } from "@/server/services/search.service";
 import { PageHeader } from "@/components/common/PageHeader";
 import { BookCard } from "@/components/common/BookCard";
+import { AuthorCard } from "@/components/common/AuthorCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
-import type { BookItem } from "@/data/books.data";
 import styles from "./SearchPage.module.scss";
-
 import { constructMetadata } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
@@ -17,26 +16,28 @@ export const revalidate = 0;
 interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
+    search?: string;
   }>;
 }
 
 export async function generateMetadata({
   searchParams,
 }: SearchPageProps): Promise<Metadata> {
-  const { q } = await searchParams;
-  const query = q ? q.trim() : "";
+  const params = await searchParams;
+  const rawQuery = (params.q || params.search || "").trim();
 
   return constructMetadata({
-    title: query
-      ? `نتائج البحث عن "${query}" | قَلَم`
+    title: rawQuery
+      ? `نتائج البحث عن "${rawQuery}" | قَلَم`
       : "البحث في المكتبة | قَلَم",
-    description: query
-      ? `نتائج البحث عن "${query}" في كتب ودراسات ومؤلفات منصة قَلَم المسيحية.`
-      : "ابحث في آلاف الكتب والدراسات والمؤلفات المسيحية عبر منصة قَلَم.",
-    path: query ? `/search?q=${encodeURIComponent(query)}` : "/search",
+    description: rawQuery
+      ? `نتائج البحث عن "${rawQuery}" في كتب ومؤلفي منصة قَلَم المسيحية.`
+      : "ابحث في آلاف الكتب والمؤلفات والدراسات المسيحية عبر منصة قَلَم.",
+    path: rawQuery ? `/search?q=${encodeURIComponent(rawQuery)}` : "/search",
     keywords: [
-      query,
+      rawQuery,
       "بحث في الكتب",
+      "مؤلفين مسيحيين",
       "كتب مسيحية",
       "منصة قلم",
       "المكتبة المسيحية",
@@ -45,22 +46,32 @@ export async function generateMetadata({
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { q } = await searchParams;
-  const rawQuery = (q || "").trim();
+  const params = await searchParams;
+  const rawQuery = (params.q || params.search || "").trim();
 
-  // Search books via API using search query parameter
-  let matchingBooks: BookItem[] = [];
-  if (rawQuery) {
-    const searchResult = await booksService.getCategoryBooks({
-      search: rawQuery,
-      page: 1,
-      perPage: 30,
-    });
-    matchingBooks = searchResult.books || [];
-  }
+  const searchResult = await searchService.search(rawQuery);
+  const { books, authors, totalCount } = searchResult;
 
   const hasQuery = rawQuery.length > 0;
-  const hasResults = matchingBooks.length > 0;
+  const hasResults = totalCount > 0;
+  const hasBooks = books.length > 0;
+  const hasAuthors = authors.length > 0;
+
+  // Subtitle generation based on findings
+  let subtitleText =
+    "اكتب كلمة البحث في شريط البحث بالأعلى لاستكشاف عناوين الكتب والمؤلفين";
+
+  if (hasQuery) {
+    if (hasBooks && hasAuthors) {
+      subtitleText = `تم العثور على ${books.length} كتاب و ${authors.length} مؤلف`;
+    } else if (hasBooks) {
+      subtitleText = `تم العثور على ${books.length} كتاب يطابق بحثك`;
+    } else if (hasAuthors) {
+      subtitleText = `تم العثور على ${authors.length} مؤلف يطابق بحثك`;
+    } else {
+      subtitleText = "لم نتمكن من العثور على كتب أو مؤلفين يطابقون كلمة البحث";
+    }
+  }
 
   return (
     <div className="page-main-wrapper">
@@ -68,13 +79,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <PageHeader
         badge="نتائج البحث"
         title={hasQuery ? `نتائج البحث عن: "${rawQuery}"` : "البحث في المكتبة"}
-        subtitle={
-          hasQuery
-            ? hasResults
-              ? `تم العثور على ${matchingBooks.length} كتاب يطابق بحثك`
-              : "لم نتمكن من العثور على كتب تطابق كلمة البحث"
-            : "اكتب كلمة البحث في شريط البحث بالأعلى لاستكشاف عناوين الكتب والمؤلفين"
-        }
+        subtitle={subtitleText}
         breadcrumbs={[{ label: "نتائج البحث" }]}
       />
 
@@ -85,15 +90,57 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <>
               <div className={styles.resultsMeta}>
                 <div className={styles.countBadge}>
-                  <span>{matchingBooks.length}</span> كتاب متاح
+                  إجمالي النتائج: <span>{totalCount}</span> نتيجة
                 </div>
               </div>
 
-              <div className={styles.booksGrid}>
-                {matchingBooks.map((book) => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
+              {/* Authors Section (if returned) */}
+              {hasAuthors && (
+                <section
+                  className={styles.resultSection}
+                  aria-label="نتائج المؤلفين"
+                >
+                  <div className={styles.sectionHeader}>
+                    <h3 className={styles.sectionTitle}>
+                      <Users size={22} />
+                      <span>المؤلفون</span>
+                    </h3>
+                    <span className={styles.sectionBadge}>
+                      {authors.length} مؤلف
+                    </span>
+                  </div>
+
+                  <div className={styles.authorsGrid}>
+                    {authors.map((author) => (
+                      <AuthorCard key={author.id} author={author} />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Books Section (if returned) */}
+              {hasBooks && (
+                <section
+                  className={styles.resultSection}
+                  aria-label="نتائج الكتب"
+                >
+                  <div className={styles.sectionHeader}>
+                    <h3 className={styles.sectionTitle}>
+                      <BookOpen size={22} />
+                      <span>الكتب</span>
+                    </h3>
+                    <span className={styles.sectionBadge}>
+                      {books.length} كتاب
+                    </span>
+                  </div>
+
+                  <div className={styles.booksGrid}>
+                    {books.map((book) => (
+                      <BookCard key={book.id} book={book} />
+                    ))}
+                  </div>
+                </section>
+              )}
             </>
           ) : (
             <div className={styles.emptyCard}>
@@ -121,10 +168,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       {/* 3. Global CTA */}
       <GlobalCTA
         badge="لم تجد ما تبحث عنه؟"
-        title="هل تبحث عن كتاب أو مخطوطة نادرة غير متوفرة؟"
-        description="فريق قَلَم يعمل باستمرار على فهرسة ورقمنة التراث المسيحي. تواصل معنا واقترح الكتب التي ترغب في توفيرها في أقرب وقت."
+        title="هل تبحث عن كتاب أو مؤلف غير متوفر؟"
+        description="فريق قَلَم يعمل باستمرار على فهرسة ورقمنة التراث والمؤلفات المسيحية. تواصل معنا واقترح ما ترغب في توفيره في أقرب وقت."
         primaryAction={{
-          label: "تواصل معنا واقترح كتاباً",
+          label: "تواصل معنا واقترح",
           href: "/contact",
         }}
         secondaryAction={{
@@ -135,4 +182,3 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     </div>
   );
 }
-

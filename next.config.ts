@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    agentUpgrade: "security",
   },
   turbopack: {},
   webpack: (config) => {

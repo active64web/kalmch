@@ -2,10 +2,78 @@ import { apiClient } from "../config/api-client";
 import {
   type SiteSettings,
   type SettingsApiResponse,
+  type HeroSettings,
+  type HeroSettingsApiResponse,
   DEFAULT_SETTINGS,
 } from "../types/settings.types";
 
 export const settingsService = {
+  /**
+   * Fetch hero section settings from GET /api/settings/hero
+   */
+  async getHeroSettings(): Promise<HeroSettings | null> {
+    try {
+      const response = await apiClient<HeroSettingsApiResponse>(
+        "/api/settings/hero",
+        {
+          method: "GET",
+          cache: "no-store",
+        }
+      );
+
+      const d = response?.data;
+      if (d) {
+        return {
+          hero_badge: d.hero_badge || d.map?.hero_badge || "",
+          hero_title: d.hero_title || d.map?.hero_title || d.title || "",
+          hero_description:
+            d.hero_description ||
+            d.map?.hero_description ||
+            d.title_descr ||
+            "",
+          hero_image:
+            d.hero_image ||
+            d.hero_image_url ||
+            d.map?.hero_image ||
+            d.map?.hero_image_url ||
+            "",
+        };
+      }
+    } catch {
+      try {
+        const response = await apiClient<HeroSettingsApiResponse>(
+          "/settings/hero",
+          {
+            method: "GET",
+            cache: "no-store",
+          }
+        );
+        const d = response?.data;
+        if (d) {
+          return {
+            hero_badge: d.hero_badge || d.map?.hero_badge || "",
+            hero_title: d.hero_title || d.map?.hero_title || d.title || "",
+            hero_description:
+              d.hero_description ||
+              d.map?.hero_description ||
+              d.title_descr ||
+              "",
+            hero_image:
+              d.hero_image ||
+              d.hero_image_url ||
+              d.map?.hero_image ||
+              d.map?.hero_image_url ||
+              "",
+          };
+        }
+      } catch (err) {
+        console.error("[settingsService] Error fetching hero settings:", err);
+      }
+    }
+
+    return null;
+  },
+
   /**
    * Fetch site settings from GET /api/settings
    */

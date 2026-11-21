@@ -1,14 +1,25 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, Users, Feather, ScrollText, BookMarked } from "lucide-react";
 import styles from "./HeroSection.module.scss";
 
-interface HeroSectionProps {
+export interface HeroSectionProps {
+  hero_badge?: string;
+  hero_title?: string;
+  hero_description?: string;
+  hero_image?: string;
   imageSrc?: string;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ imageSrc }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({
+  hero_badge,
+  hero_title,
+  hero_description,
+  hero_image,
+  imageSrc,
+}) => {
+  const displayImage = hero_image || imageSrc;
+
   return (
     <section className={styles.heroWrapper} aria-label="مقدمة المنصة">
       {/* 1. Subtle Floating Ambient Elements (Books & Pens) */}
@@ -35,28 +46,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ imageSrc }) => {
 
       <div className="container">
         <div className={styles.heroContainer}>
-          {/* Column 1: Content (Preserved text & actions, aligned in two-column grid) */}
+          {/* Column 1: Content */}
           <div className={styles.contentColumn}>
-            {/* 2. Gentle Welcome Pill */}
-            <div className={styles.welcomePill}>
-              <Feather size={15} className={styles.pillIcon} />
-              <span>منصة النشر والقراءة المسيحية</span>
-            </div>
+            {/* 2. Welcome Pill */}
+            {hero_badge && (
+              <div className={styles.welcomePill}>
+                <Feather size={15} className={styles.pillIcon} />
+                <span>{hero_badge}</span>
+              </div>
+            )}
 
             {/* 3. Headline Title */}
-            <h1 className={styles.heroTitle}>
-              <span className={styles.titleLine1}>حيث تلتقي الكلمة العميقة</span>{" "}
-              <span className={styles.titleLine2}>
-                بـ <span className={styles.highlight}>أقلام مسيحية</span> أصيلة
-              </span>
-            </h1>
+            {hero_title && (
+              <h1 className={styles.heroTitle}>
+                {hero_title}
+              </h1>
+            )}
 
             {/* 4. Description */}
-            <p className={styles.heroDescription}>
-              تهدف منصة <strong>قَلَم</strong> إلى تشجيع الكُتاب والمفكرين وإثراء
-              مكتبتنا العربية بمؤلفات جديدة في العلوم الروحية، واللاهوتية، والتاريخ
-              الكنسي، وتوفيرها للقراءة المجانية المباشرة بكل يسر وهدوء.
-            </p>
+            {hero_description && (
+              <p className={styles.heroDescription}>
+                {hero_description}
+              </p>
+            )}
 
             {/* 5. Pleasant General Actions */}
             <div className={styles.actionsRow}>
@@ -86,19 +98,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ imageSrc }) => {
 
               <div
                 className={`${styles.visualCard} ${
-                  imageSrc ? styles.hasImage : ""
+                  displayImage ? styles.hasImage : ""
                 }`}
               >
-                {imageSrc ? (
-                  <Image
-                    src={imageSrc}
-                    alt="منصة قَلَم للمكتبة المسيحية"
-                    width={446}
-                    height={388}
-                    priority
-                    fetchPriority="high"
+                {displayImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={displayImage}
+                    alt={hero_title || "منصة قَلَم للمكتبة المسيحية"}
                     className={styles.heroImage}
-                    sizes="(max-width: 768px) 306px, (max-width: 992px) 346px, 446px"
+                    loading="eager"
                   />
                 ) : (
                   <div className={styles.placeholderArtwork} aria-hidden="true">

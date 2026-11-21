@@ -1,3 +1,31 @@
+export interface HeroSettings {
+  hero_badge?: string;
+  hero_title?: string;
+  hero_description?: string;
+  hero_image?: string;
+  hero_image_url?: string;
+}
+
+export interface HeroSettingsApiResponse {
+  success?: boolean;
+  message?: string;
+  data?: HeroSettings & {
+    title?: string;
+    title_descr?: string;
+    hero_image_url?: string;
+    map?: HeroSettings;
+    settings?: Array<{
+      id: number;
+      key: string;
+      value: string;
+      raw_value?: string;
+      display_name?: string;
+      group?: string;
+      type?: string;
+    }>;
+  };
+}
+
 export interface SiteSettings {
   phone: string;
   whatsapp: string;

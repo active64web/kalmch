@@ -9,6 +9,7 @@ import {
 } from "@/features/home";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import { constructMetadata } from "@/utils/seo";
+import { settingsService } from "@/server/services/settings.service";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +29,17 @@ export const metadata: Metadata = constructMetadata({
   ],
 });
 
-export default function Home() {
+export default async function Home() {
+  const heroData = await settingsService.getHeroSettings();
+
   return (
     <div className="page-main-wrapper">
-      <HeroSection imageSrc="/hero-artwork.jpg" />
+      <HeroSection
+        hero_badge={heroData?.hero_badge}
+        hero_title={heroData?.hero_title}
+        hero_description={heroData?.hero_description}
+        hero_image={heroData?.hero_image}
+      />
       <CategoriesSection />
       <BooksSection />
       <ArticlesSection />

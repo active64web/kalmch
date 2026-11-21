@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "ch-library.eladrabarakelkhyam.com",
+      },
+      {
+        protocol: "https",
         hostname: "flagcdn.com",
       },
     ],

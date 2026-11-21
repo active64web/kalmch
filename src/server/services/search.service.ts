@@ -1,6 +1,7 @@
 import { apiClient } from "../config/api-client";
 import type { BookItem } from "@/data/books.data";
 import type { AuthorItem } from "@/data/authors.data";
+import type { AuthorItemWithImage } from "../types/author.types";
 import { mapApiBookToBookItem } from "./books.service";
 import type {
   SearchApiResponse,
@@ -9,7 +10,7 @@ import type {
 
 export function mapApiSearchAuthorToAuthorItem(
   author: ApiSearchAuthor
-): AuthorItem {
+): AuthorItemWithImage {
   let ageOrStatus = author.life_status;
   if (!ageOrStatus) {
     if (author.is_contemporary) {
@@ -26,13 +27,16 @@ export function mapApiSearchAuthorToAuthorItem(
     author.country?.name_en ||
     "غير محدد";
 
+  const imageUrl = author.image_url || undefined;
+
   return {
     id: String(author.id),
     slug: author.slug || String(author.id),
     name: author.name,
     country: countryName,
     ageOrStatus,
-    avatar: author.image_url || undefined,
+    avatar: imageUrl,
+    image_url: imageUrl,
     bio: author.bio || undefined,
   };
 }

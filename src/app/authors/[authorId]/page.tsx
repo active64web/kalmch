@@ -1,10 +1,9 @@
 import React from "react";
 import { Metadata } from "next";
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { User } from "lucide-react";
 import { authorsService } from "@/server/services/authors.service";
 import { PageHeader } from "@/components/common/PageHeader";
+import { AuthorAvatar } from "./AuthorAvatar";
 import { AuthorBooksList } from "./AuthorBooksList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import styles from "./AuthorDetails.module.scss";
@@ -38,11 +37,13 @@ export async function generateMetadata({
     author.bio ||
     `تصفح سيرة ومؤلفات وكتب ${author.name} في منصة قَلَم للمكتبة المسيحية.`;
 
+  const authorImg = (author as { image_url?: string; avatar?: string }).image_url || author.avatar;
+
   return constructMetadata({
     title: `${author.name} - سيرته ومؤلفاته | قَلَم`,
     description: desc,
     path: `/authors/${author.slug || author.id}`,
-    image: author.avatar,
+    image: authorImg,
     keywords: [
       author.name,
       `مؤلفات ${author.name}`,
@@ -92,19 +93,13 @@ export default async function AuthorDetailsPage({
       >
         <div className="container">
           <div className={styles.profileCard}>
-            <div className={styles.avatarBox}>
-              {author.avatar ? (
-                <Image
-                  src={author.avatar}
-                  alt={author.name}
-                  fill
-                  sizes="96px"
-                  className={styles.avatarImg}
-                />
-              ) : (
-                <User size={40} color="var(--main_color)" />
-              )}
-            </div>
+            <AuthorAvatar
+              imageUrl={
+                (author as { image_url?: string; avatar?: string }).image_url ||
+                author.avatar
+              }
+              name={author.name}
+            />
 
             <h2 className={styles.authorName}>{author.name}</h2>
 

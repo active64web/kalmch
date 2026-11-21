@@ -1,4 +1,9 @@
 import type { BookItem } from "@/data/books.data";
+import type { AuthorItem } from "@/data/authors.data";
+
+export interface AuthorItemWithImage extends AuthorItem {
+  image_url?: string | null;
+}
 
 export interface ApiAuthorCountry {
   id: number | string;

@@ -1,15 +1,20 @@
-import React, { memo } from "react";
+"use client";
+
+import React, { memo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { User } from "lucide-react";
 import type { AuthorItem } from "@/data/authors.data";
 import styles from "./AuthorCard.module.scss";
 
 interface AuthorCardProps {
-  author: AuthorItem;
+  author: AuthorItem & { image_url?: string | null };
 }
 
 const AuthorCardComponent: React.FC<AuthorCardProps> = ({ author }) => {
+  const imageUrl = author.image_url || author.avatar;
+  const [hasError, setHasError] = useState(false);
+  const showImage = Boolean(imageUrl) && !hasError;
+
   return (
     <Link
       href={`/authors/${encodeURIComponent(author.slug || author.id)}`}
@@ -17,13 +22,14 @@ const AuthorCardComponent: React.FC<AuthorCardProps> = ({ author }) => {
       aria-label={`المؤلف ${author.name}`}
     >
       <div className={styles.avatarBox}>
-        {author.avatar ? (
-          <Image
-            src={author.avatar}
+        {showImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
             alt={author.name}
-            fill
-            sizes="64px"
             className={styles.avatarImg}
+            onError={() => setHasError(true)}
+            loading="lazy"
           />
         ) : (
           <User size={26} color="var(--main_color)" />

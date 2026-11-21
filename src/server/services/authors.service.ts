@@ -3,13 +3,14 @@ import type { AuthorItem } from "@/data/authors.data";
 import { mapApiBookToBookItem } from "./books.service";
 import type {
   ApiAuthor,
+  AuthorItemWithImage,
   AuthorsApiResponse,
   GetAuthorBooksParams,
   GetAuthorBooksResult,
 } from "../types/author.types";
 import type { ApiBook, PaginatedBooksResponse } from "../types/book.types";
 
-export function mapApiAuthorToAuthorItem(author: ApiAuthor): AuthorItem {
+export function mapApiAuthorToAuthorItem(author: ApiAuthor): AuthorItemWithImage {
   let ageOrStatus = author.life_status;
   if (!ageOrStatus) {
     if (author.is_contemporary) {
@@ -28,13 +29,16 @@ export function mapApiAuthorToAuthorItem(author: ApiAuthor): AuthorItem {
     author.country?.name_en ||
     "غير محدد";
 
+  const imageUrl = author.image_url || undefined;
+
   return {
     id: String(author.id),
     slug: author.slug || String(author.id),
     name: author.name,
     country: countryName,
     ageOrStatus,
-    avatar: author.image_url || undefined,
+    avatar: imageUrl,
+    image_url: imageUrl,
     bio: author.bio || undefined,
     countryFlag: author.country?.flag_emoji || undefined,
     birthYear: author.birth_year || null,
@@ -46,7 +50,7 @@ export const authorsService = {
   /**
    * Fetch all authors from GET /api/authors
    */
-  async getAllAuthors(): Promise<AuthorItem[]> {
+  async getAllAuthors(): Promise<AuthorItemWithImage[]> {
     try {
       const response = await apiClient<AuthorsApiResponse | ApiAuthor[]>(
         "/api/authors",
@@ -74,7 +78,7 @@ export const authorsService = {
   /**
    * Fetch top authors (default 10) for home page section
    */
-  async getTopAuthors(limit = 10): Promise<AuthorItem[]> {
+  async getTopAuthors(limit = 10): Promise<AuthorItemWithImage[]> {
     const all = await this.getAllAuthors();
     return all.slice(0, limit);
   },
@@ -82,7 +86,7 @@ export const authorsService = {
   /**
    * Find author by slug or id
    */
-  async getAuthorByIdOrSlug(idOrSlug: string): Promise<AuthorItem | null> {
+  async getAuthorByIdOrSlug(idOrSlug: string): Promise<AuthorItemWithImage | null> {
     const authors = await this.getAllAuthors();
     const cleanId = decodeURIComponent(idOrSlug).trim().toLowerCase();
 

@@ -7,7 +7,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/my-library", "/login", "/register"],
+        disallow: ["/my-library", "/login", "/register", "/profile"],
+      },
+      {
+        userAgent: ["GPTBot", "PerplexityBot", "ClaudeBot", "Google-Extended"],
+        allow: "/",
+        disallow: ["/my-library", "/login", "/register", "/profile"],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,

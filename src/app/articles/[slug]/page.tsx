@@ -6,7 +6,7 @@ import { ScrollText, Feather, Calendar, Eye, ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/common/PageHeader";
 import { ArticleCard } from "@/components/common/ArticleCard";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 import { articlesService } from "@/server/services/articles.service";
 import { ArticleShareBtn } from "./ArticleShareBtn";
 import { ArticleCover } from "./ArticleCover";
@@ -38,10 +38,14 @@ export async function generateMetadata({
     });
   }
 
+  const articlePath = `/articles/${encodeURIComponent(article.slug || article.id)}`;
+
   return constructMetadata({
     title: `${article.title} - ${article.author} | قَلَم`,
-    description: article.excerpt,
-    path: `/articles/${article.id}`,
+    description:
+      article.excerpt ||
+      `قراءة مقال "${article.title}" للكاتب ${article.author} في منصة قَلَم للمكتبة المسيحية.`,
+    path: articlePath,
     image: article.coverImage,
     type: "article",
     keywords: [
@@ -49,7 +53,8 @@ export async function generateMetadata({
       article.author,
       article.category,
       "مقالات مسيحية",
-      "دراسات كنسية",
+      "دراسات كنسية وآبائية",
+      "فكر مسيحي",
       "منصة قلم",
     ],
   });
@@ -67,6 +72,7 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     notFound();
   }
 
+  const articleUrl = `${BASE_URL}/articles/${encodeURIComponent(article.slug || article.id)}`;
   const reads = Number(article.readsCount ?? article.viewsCount ?? 0);
   const typeName = article.type || "مقال";
 
@@ -76,8 +82,64 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     ? [article.shortDescription]
     : [article.excerpt];
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    image: article.coverImage || `${BASE_URL}/logo.jpg`,
+    author: {
+      "@type": "Person",
+      name: article.author,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "قَلَم للمكتبة المسيحية",
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/logo.jpg`,
+      },
+    },
+    datePublished: article.publishedAt,
+    inLanguage: "ar",
+    mainEntityOfPage: articleUrl,
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "المقالات والدراسات",
+        item: `${BASE_URL}/articles`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: article.title,
+        item: articleUrl,
+      },
+    ],
+  };
+
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. View Tracker (Records view once without inflating on page refresh) */}
       <ArticleReadTracker articleId={article.id} />
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const BASE_URL = "https://kalmch.com";
-export const SITE_NAME = "قَلَم | المكتبة المسيحية";
+export const SITE_NAME = "قَلَم - المكتبة المسيحية الرقمية";
 export const DEFAULT_OG_IMAGE = `${BASE_URL}/logo.jpg`;
 
 export interface PageMetadataOptions {
@@ -29,12 +29,12 @@ export function constructMetadata({
   const formattedTitle =
     title.includes("قَلَم") || title.includes("قلم")
       ? title
-      : `${title} | قَلَم`;
+      : `${title} | قَلَم - المكتبة المسيحية`;
 
   const keywordsString = Array.isArray(keywords)
     ? keywords.join(", ")
     : keywords ||
-      "كتب مسيحية, قراءة كتب مسيحية, منصة قلم, كتب روحية, تفاسير الكتاب المقدس, تاريخ الكنيسة, دراسات آبائية, سير القديسين";
+      "كتب مسيحية, قراءة كتب مسيحية أونلاين, منصة قلم, كتب روحية, تفاسير الكتاب المقدس, تاريخ الكنيسة القبطية, دراسات آبائية, سير القديسين, أقوال الآباء, لاهوت مسيحي, مكتبة مسيحية شاملة";
 
   const ogImage = image.startsWith("http")
     ? image
@@ -44,8 +44,16 @@ export function constructMetadata({
     title: formattedTitle,
     description,
     keywords: keywordsString,
+    authors: [{ name: "منصة قَلَم للمكتبة المسيحية", url: BASE_URL }],
+    creator: "منصة قَلَم",
+    publisher: "منصة قَلَم للمكتبة المسيحية الرقمية",
+    category: "Christian Literature & Theology",
     alternates: {
       canonical: canonicalUrl,
+      languages: {
+        "ar-EG": canonicalUrl,
+        "ar": canonicalUrl,
+      },
     },
     openGraph: {
       title: formattedTitle,
@@ -57,8 +65,8 @@ export function constructMetadata({
       images: [
         {
           url: ogImage,
-          width: 800,
-          height: 800,
+          width: 1200,
+          height: 630,
           alt: formattedTitle,
         },
       ],
@@ -77,7 +85,15 @@ export function constructMetadata({
         follow: !noIndex,
         "max-image-preview": "large",
         "max-snippet": -1,
+        "max-video-preview": -1,
       },
+    },
+    other: {
+      "geo.region": "EG",
+      "geo.placename": "Cairo",
+      "geo.position": "30.0444;31.2357",
+      "ICBM": "30.0444, 31.2357",
+      "content-language": "ar",
     },
   };
 }

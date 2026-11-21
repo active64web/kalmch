@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { BookDetailsContainer } from "@/features/book-details";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +63,71 @@ export default async function BookDetailPage({ params }: BookPageProps) {
     notFound();
   }
 
+  const bookUrl = `${BASE_URL}/categories/${encodeURIComponent(book.categorySlug)}/${encodeURIComponent(book.id)}`;
+  const bookJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    name: book.title,
+    author: {
+      "@type": "Person",
+      name: book.author,
+    },
+    description:
+      book.description ||
+      `قراءة ومطالعة كتاب ${book.title} للمؤلف ${book.author} في قسم ${book.category} عبر منصة قَلَم للمكتبة المسيحية.`,
+    image: book.coverImage || `${BASE_URL}/logo.jpg`,
+    inLanguage: "ar",
+    genre: book.category,
+    ...(book.pagesCount ? { numberOfPages: book.pagesCount } : {}),
+    url: bookUrl,
+    publisher: {
+      "@type": "Organization",
+      name: "قَلَم للمكتبة المسيحية",
+      url: BASE_URL,
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "أقسام المكتبة",
+        item: `${BASE_URL}/categories`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: book.category,
+        item: `${BASE_URL}/categories/${encodeURIComponent(book.categorySlug)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: book.title,
+        item: bookUrl,
+      },
+    ],
+  };
+
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(bookJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. Page Header (Badge: تفاصيل الكتاب | Title: اسم الكتاب | بدون سطر المؤلف) */}
       <PageHeader
         badge="تفاصيل الكتاب"

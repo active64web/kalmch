@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { CategoryBooksList } from "@/features/categories/CategoryBooksList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +37,14 @@ export async function generateMetadata({
     title: `كتب ${category.title} | قَلَم - المكتبة المسيحية`,
     description:
       category.description ||
-      `استعرض واقرأ كتب قسم ${category.title} في المكتبة المسيحية على منصة قَلَم.`,
+      `تصفح واقرأ مباشرة أمهات كتب ودراسات قسم ${category.title} في المكتبة المسيحية لنخبة من كبار الآباء واللاهوتيين عبر منصة قَلَم.`,
     path: `/categories/${category.slug}`,
     keywords: [
       `كتب ${category.title}`,
+      `قراءة كتب ${category.title}`,
       category.title,
-      "كتب مسيحية",
-      "قراءة اونلاين",
+      "كتب مسيحية أونلاين",
+      "المكتبة القبطية",
       "منصة قلم",
     ],
   });
@@ -73,8 +74,37 @@ export default async function CategoryBooksPage({
     category.description ||
     `تصفح كافة الكتب والمؤلفات المصنفة ضمن قسم ${category.title}.`;
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "الرئيسية",
+        "item": BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "أقسام المكتبة",
+        "item": `${BASE_URL}/categories`,
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": category.title,
+        "item": `${BASE_URL}/categories/${category.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. Page Header */}
       <PageHeader
         badge="كتب القسم"

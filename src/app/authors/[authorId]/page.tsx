@@ -7,7 +7,7 @@ import { AuthorAvatar } from "./AuthorAvatar";
 import { AuthorBooksList } from "./AuthorBooksList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
 import styles from "./AuthorDetails.module.scss";
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,6 +66,46 @@ export default async function AuthorDetailsPage({
     notFound();
   }
 
+  const authorUrl = `${BASE_URL}/authors/${author.slug || author.id}`;
+  const authorImg = (author as { image_url?: string; avatar?: string }).image_url || author.avatar;
+
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: author.name,
+    description:
+      author.bio ||
+      `سيرة ومؤلفات وأعمال الكاتب ${author.name} في منصة قَلَم للمكتبة المسيحية.`,
+    image: authorImg || `${BASE_URL}/logo.jpg`,
+    url: authorUrl,
+    ...(author.country ? { nationality: author.country } : {}),
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "المؤلفون",
+        item: `${BASE_URL}/authors`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: author.name,
+        item: authorUrl,
+      },
+    ],
+  };
+
   // Fetch author books from GET /api/authors/{id}/books?page=1&per_page=15
   const booksResult = await authorsService.getAuthorBooks({
     authorId: author.id,
@@ -75,6 +115,14 @@ export default async function AuthorDetailsPage({
 
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. Page Header */}
       <PageHeader
         badge="سيرة ومؤلفات"

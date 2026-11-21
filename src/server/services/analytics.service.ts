@@ -1,5 +1,5 @@
 import { apiClient } from "../config/api-client";
-import { visitorsData, type CountryVisitorItem } from "@/data/visitors.data";
+import type { CountryVisitorItem } from "@/data/visitors.data";
 import type {
   ApiCountryVisitor,
   VisitorsApiResponse,
@@ -75,11 +75,11 @@ export const analyticsService = {
       // Fallback below
     }
 
-    // Fallback to static visitorsData
+    // Fallback on error
     return {
-      countries: visitorsData,
-      totalUniqueVisitors: 250000,
-      totalPageViews: 850000,
+      countries: [],
+      totalUniqueVisitors: 0,
+      totalPageViews: 0,
     };
   },
 

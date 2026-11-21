@@ -59,19 +59,19 @@ export interface SettingsApiResponse {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  phone: "+201234567890",
-  whatsapp: "+201234567890",
-  email: "contact@qalam-library.com",
-  address: "القاهرة، مصر",
-  facebook: "https://facebook.com/qalamlibrary",
-  instagram: "https://instagram.com/qalamlibrary",
-  youtube: "https://youtube.com/@qalamlibrary",
-  twitter: "https://x.com/qalamlibrary",
-  telegram: "https://t.me/qalamlibrary",
-  tiktok: "https://tiktok.com/@qalamlibrary",
-  site_name: "مكتبة قلم CH",
+  phone: "",
+  whatsapp: "",
+  email: "",
+  address: "",
+  facebook: "",
+  instagram: "",
+  youtube: "",
+  twitter: "",
+  telegram: "",
+  tiktok: "",
+  site_name: "قَلَم",
   about_app:
-    "مكتبة قلم CH - منصة رقمية متخصصة في الكتب والمقالات والدراسات الروحية واللاهوتية المسيحية الموثوقة.",
-  copyright: "جميع الحقوق محفوظة لمكتبة قلم CH © 2026",
+    "قَلَم - منصة رقمية متخصصة في نشر وقراءة الكتب والمقالات والدراسات الروحية واللاهوتية المسيحية الموثوقة.",
+  copyright: "جميع الحقوق محفوظة لمنصة قَلَم © 2026",
 };
 

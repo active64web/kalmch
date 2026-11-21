@@ -1,5 +1,5 @@
 import { apiClient } from "../config/api-client";
-import { categoriesData, type CategoryItem } from "@/data/categories.data";
+import type { CategoryItem } from "@/data/categories.data";
 import type {
   ApiCategory,
   CategoriesApiResponse,
@@ -36,12 +36,12 @@ export const categoriesService = {
         : null;
 
       if (!rawCategories) {
-        return categoriesData;
+        return [];
       }
 
       return rawCategories.map(mapApiCategoryToItem);
     } catch {
-      return categoriesData;
+      return [];
     }
   },
 };

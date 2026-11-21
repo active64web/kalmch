@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { PageHeader } from "@/components/common/PageHeader";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 import { articlesService } from "@/server/services/articles.service";
 import { ArticlesList } from "./ArticlesList";
 
@@ -10,17 +10,18 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = constructMetadata({
-  title: "المقالات والدراسات | قَلَم - إضاءات الفكر المسيحي",
+  title: "المقالات والدراسات الروحية والآبائية | قَلَم",
   description:
-    "استكشف باقة من المقالات الروحية والدراسات الآبائية واللاهوتية العميقة لنخبة من كبار الآباء والمؤلفين عبر منصة قَلَم.",
+    "مجموعة متجددة من المقالات والدراسات الروحية، والبحوث الآبائية واللاهوتية لنخبة من كبار الآباء والمفكرين المعاصرين عبر منصة قَلَم للمكتبة المسيحية.",
   path: "/articles",
   keywords: [
     "مقالات مسيحية",
     "دراسات آبائية",
-    "فكر كنسي",
+    "فكر كنسي قبطي",
     "دراسات لاهوتية",
-    "مقالات البابا شنوده",
-    "مقالات متى المسكين",
+    "تأملات روحية",
+    "مقالات البابا شنوده الثالث",
+    "مقالات الأب متى المسكين",
     "منصة قلم",
   ],
 });
@@ -31,8 +32,31 @@ export default async function ArticlesPage() {
     perPage: 15,
   });
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "المقالات والدراسات",
+        item: `${BASE_URL}/articles`,
+      },
+    ],
+  };
+
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. Page Header */}
       <PageHeader
         badge="أقلام وفكر"

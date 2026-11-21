@@ -1,14 +1,22 @@
 import { MetadataRoute } from "next";
 import { BASE_URL } from "@/utils/seo";
-import { categoriesData } from "@/data/categories.data";
-import { booksData } from "@/data/books.data";
-import { authorsData } from "@/data/authors.data";
-import { articlesData } from "@/data/articles.data";
+import { categoriesService } from "@/server/services/categories.service";
+import { booksService } from "@/server/services/books.service";
+import { authorsService } from "@/server/services/authors.service";
+import { articlesService } from "@/server/services/articles.service";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+import type { CategoryItem } from "@/data/categories.data";
+import type { BookItem } from "@/data/books.data";
+import type { AuthorItem } from "@/data/authors.data";
+import type { ArticleItem } from "@/data/articles.data";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const currentDate = new Date().toISOString();
 
-  // 1. Static Pages
+  // 1. Static Core Pages
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -19,20 +27,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/categories`,
       lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
+      changeFrequency: "daily",
+      priority: 0.95,
     },
     {
       url: `${BASE_URL}/authors`,
       lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
+      changeFrequency: "daily",
+      priority: 0.95,
     },
     {
       url: `${BASE_URL}/articles`,
       lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
+      changeFrequency: "daily",
+      priority: 0.95,
     },
     {
       url: `${BASE_URL}/contact`,
@@ -42,43 +50,67 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // 2. Categories Pages
-  const categoryRoutes: MetadataRoute.Sitemap = categoriesData.map((category) => ({
-    url: `${BASE_URL}/categories/${category.slug}`,
-    lastModified: currentDate,
-    changeFrequency: "weekly",
-    priority: 0.85,
-  }));
+  try {
+    const [categories, recentBooks, authors, articlesResult] =
+      await Promise.all([
+        categoriesService.getCategories().catch((): CategoryItem[] => []),
+        booksService.getLatestBooks().catch((): BookItem[] => []),
+        authorsService.getAllAuthors().catch((): AuthorItem[] => []),
+        articlesService.getArticles({ perPage: 150 }).catch(() => ({
+          articles: [] as ArticleItem[],
+          hasMore: false,
+          total: 0,
+        })),
+      ]);
 
-  // 3. Books Detail Pages
-  const bookRoutes: MetadataRoute.Sitemap = booksData.map((book) => ({
-    url: `${BASE_URL}/categories/${book.categorySlug}/${book.id}`,
-    lastModified: currentDate,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
+    // 2. Categories Pages
+    const categoryRoutes: MetadataRoute.Sitemap = categories.map(
+      (category: CategoryItem) => ({
+        url: `${BASE_URL}/categories/${category.slug}`,
+        lastModified: currentDate,
+        changeFrequency: "weekly",
+        priority: 0.85,
+      })
+    );
 
-  // 4. Authors Pages
-  const authorRoutes: MetadataRoute.Sitemap = authorsData.map((author) => ({
-    url: `${BASE_URL}/authors/${author.slug || author.id}`,
-    lastModified: currentDate,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
+    // 3. Books Detail Pages
+    const bookRoutes: MetadataRoute.Sitemap = recentBooks.map(
+      (book: BookItem) => ({
+        url: `${BASE_URL}/categories/${book.categorySlug}/${book.id}`,
+        lastModified: currentDate,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      })
+    );
 
-  // 5. Articles Detail Pages
-  const articleRoutes: MetadataRoute.Sitemap = articlesData.map((article) => ({
-    url: `${BASE_URL}/articles/${article.slug}`,
-    lastModified: currentDate,
-    changeFrequency: "monthly",
-    priority: 0.8,
-  }));
+    // 4. Authors Pages
+    const authorRoutes: MetadataRoute.Sitemap = authors.map(
+      (author: AuthorItem) => ({
+        url: `${BASE_URL}/authors/${author.slug || author.id}`,
+        lastModified: currentDate,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      })
+    );
 
-  return [
-    ...staticRoutes,
-    ...categoryRoutes,
-    ...bookRoutes,
-    ...authorRoutes,
-    ...articleRoutes,
-  ];
+    // 5. Articles Detail Pages
+    const articleRoutes: MetadataRoute.Sitemap = articlesResult.articles.map(
+      (article: ArticleItem) => ({
+        url: `${BASE_URL}/articles/${article.slug || article.id}`,
+        lastModified: currentDate,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      })
+    );
+
+    return [
+      ...staticRoutes,
+      ...categoryRoutes,
+      ...bookRoutes,
+      ...authorRoutes,
+      ...articleRoutes,
+    ];
+  } catch {
+    return staticRoutes;
+  }
 }

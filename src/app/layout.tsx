@@ -80,7 +80,15 @@ export const metadata: Metadata = {
       follow: true,
       "max-image-preview": "large",
       "max-snippet": -1,
+      "max-video-preview": -1,
     },
+  },
+  other: {
+    "geo.region": "EG",
+    "geo.placename": "Cairo",
+    "geo.position": "30.0444;31.2357",
+    "ICBM": "30.0444, 31.2357",
+    "content-language": "ar",
   },
 };
 
@@ -91,8 +99,58 @@ export default async function RootLayout({
 }) {
   const settings = await settingsService.getSettings();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${BASE_URL}/#organization`,
+        "name": "قَلَم - المكتبة المسيحية الرقمية",
+        "url": BASE_URL,
+        "logo": `${BASE_URL}/logo.jpg`,
+        "description":
+          "منصة قَلَم هي المكتبة الرقمية المسيحية الموثوقة لقراءة أمهات الكتب والدراسات الكنسية واللاهوتية والآبائية وتفاسير الكتاب المقدس بدون تحميل مجاناً وبأعلى درجات الوقار والبساطة.",
+        "sameAs": [
+          settings.facebook,
+          settings.youtube,
+          settings.instagram,
+          settings.telegram,
+        ].filter(Boolean),
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "availableLanguage": ["Arabic"],
+        },
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${BASE_URL}/#website`,
+        "url": BASE_URL,
+        "name": "قَلَم",
+        "alternateName": "منصة قَلَم للمكتبة المسيحية",
+        "description":
+          "المكتبة المسيحية الإلكترونية الشاملة لقراءة أمهات الكتب والدراسات الروحية والكنسية والآبائية.",
+        "publisher": {
+          "@id": `${BASE_URL}/#organization`,
+        },
+        "inLanguage": "ar-EG",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": `${BASE_URL}/search?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <html lang="ar" dir="rtl" className={almarai.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={almarai.className}>
         <AuthProvider>
           <SettingsProvider initialSettings={settings}>

@@ -4,24 +4,27 @@ import { authorsService } from "@/server/services/authors.service";
 import { PageHeader } from "@/components/common/PageHeader";
 import { AuthorsList } from "./AuthorsList";
 import { GlobalCTA } from "@/components/common/GlobalCTA";
-import { constructMetadata } from "@/utils/seo";
+import { constructMetadata, BASE_URL } from "@/utils/seo";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata: Metadata = constructMetadata({
-  title: "المؤلفون | قَلَم - أعلام الفكر الكنسي",
+  title: "المؤلفون وأعلام الفكر المسيحي والكنسي | قَلَم",
   description:
-    "تعرف على آباء الكنيسة، اللاهوتيين، والمؤلفين المسيحيين وتصفح كافة مؤلفاتهم وأعمالهم الخالدة عبر منصة قَلَم.",
+    "دليل شامل لآباء الكنيسة، اللاهوتيين، والمفكرين المسيحيين المعاصرين والأوائل: تصفح سيرهم الذاتية، مؤلفاتهم، وكتبهم المتاحة للقراءة المباشرة عبر منصة قَلَم.",
   path: "/authors",
   keywords: [
     "مؤلفين مسيحيين",
-    "آباء الكنيسة",
+    "آباء الكنيسة الأوائل",
     "البابا شنوده الثالث",
     "الأب متى المسكين",
-    "القمص تادرس يعقوب",
+    "القمص تادرس يعقوب ملطي",
     "نيافة الأنبا رافائيل",
-    "كتب مسيحية",
+    "القديس أثناسيوس الرسولي",
+    "القديس كيرلس الكبير",
+    "يوحنا ذهبي الفم",
+    "مكتبة مسيحية",
     "منصة قلم",
   ],
 });
@@ -29,8 +32,31 @@ export const metadata: Metadata = constructMetadata({
 export default async function AuthorsPage() {
   const allAuthors = await authorsService.getAllAuthors();
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "الرئيسية",
+        item: BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "المؤلفون",
+        item: `${BASE_URL}/authors`,
+      },
+    ],
+  };
+
   return (
     <div className="page-main-wrapper">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* 1. Page Header */}
       <PageHeader
         badge="أعلام الفكر الكنسي"
